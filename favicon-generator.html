@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    h1 { color: #333; }
+    .section { margin: 30px 0; }
+    button { padding: 10px 20px; background: #a58242; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #7a5f2e; }
+    canvas { border: 1px solid #ddd; margin: 10px 0; display: block; }
+    .info { background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 12px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+<h1>Favicon Generator</h1>
+<p>Click the buttons below to generate and download favicon PNG files.</p>
+
+<div class="section">
+  <h2>Favicon 32×32</h2>
+  <canvas id="canvas32" width="32" height="32"></canvas>
+  <button onclick="downloadFavicon(32)">Download favicon-32x32.png</button>
+  <div class="info">Standard browser tab icon (32×32 pixels)</div>
+</div>
+
+<div class="section">
+  <h2>Favicon 16×16</h2>
+  <canvas id="canvas16" width="16" height="16"></canvas>
+  <button onclick="downloadFavicon(16)">Download favicon-16x16.png</button>
+  <div class="info">Legacy browser favicon (16×16 pixels)</div>
+</div>
+
+<div class="section">
+  <h2>Apple Touch Icon 180×180</h2>
+  <canvas id="canvasApple" width="180" height="180"></canvas>
+  <button onclick="downloadFavicon(180, 'apple')">Download apple-touch-icon.png</button>
+  <div class="info">iOS home screen icon (180×180 pixels)</div>
+</div>
+
+<div class="section" style="background: #fef3e6; padding: 15px; border-radius: 4px;">
+  <h3>Instructions</h3>
+  <ol>
+    <li>Click each button to generate and download the favicon PNG files</li>
+    <li>Save them in the root folder of the application (same level as index.html)</li>
+    <li>The favicon.svg is already in place for modern browsers</li>
+    <li>Keep PNG versions for fallback support in older browsers</li>
+  </ol>
+</div>
+
+<script>
+  function drawIcon(ctx, size) {
+    ctx.clearRect(0, 0, size, size);
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+
+    // Scale factor to convert from 24x24 viewBox to target size
+    const scale = size / 24;
+    const lw = Math.max(1.2, 2 * scale);
+
+    ctx.strokeStyle = '#a58242';
+    ctx.lineWidth = lw;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Draw rounded rectangle (cover border)
+    const x = 2 * scale, y = 3 * scale, w = 20 * scale, h = 18 * scale, r = 2 * scale;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Left vertical line (left spine boundary)
+    ctx.beginPath();
+    ctx.moveTo(9 * scale, 3 * scale);
+    ctx.lineTo(9 * scale, 21 * scale);
+    ctx.stroke();
+
+    // Right vertical line (right spine boundary)
+    ctx.beginPath();
+    ctx.moveTo(15 * scale, 3 * scale);
+    ctx.lineTo(15 * scale, 21 * scale);
+    ctx.stroke();
+  }
+
+  function generateAndDrawIcon(canvasId, size) {
+    const canvas = document.getElementById(canvasId);
+    drawIcon(canvas.getContext('2d'), size);
+  }
+
+  function downloadFavicon(size, type = null) {
+    const canvas = type === 'apple' ?
+      document.getElementById('canvasApple') :
+      document.getElementById('canvas' + size);
+
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = type === 'apple' ? 'apple-touch-icon.png' : `favicon-${size}x${size}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Generate all icons on load
+  window.addEventListener('load', () => {
+    generateAndDrawIcon('canvas32', 32);
+    generateAndDrawIcon('canvas16', 16);
+    generateAndDrawIcon('canvasApple', 180);
+  });
+</script>
+
+</body>
+</html>
