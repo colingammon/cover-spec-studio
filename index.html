@@ -498,7 +498,10 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:20px 22px;margin-bottom:14px">
       <a href="#" onclick="showTab('micron');return false;" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;text-decoration:none;color:inherit">
         <div style="width:36px;height:36px;background:var(--accent);border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="15"/></svg>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Micron symbol: μ -->
+            <text x="12" y="16" font-family="serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#000">μ</text>
+          </svg>
         </div>
         <div>
           <div style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text)">Micron → Volume</div>
@@ -612,7 +615,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
       <div class="field-group">
         <label>Binding</label>
         <div class="input-wrap">
-          <select id="binding"><option value="0">Perfect Bound</option><option value="2">Sewn</option></select>
+          <select id="binding"><option value="0">Perfect/PUR Bound</option><option value="2">Sewn</option></select>
           <span class="select-arrow">▾</span>
         </div>
       </div>
