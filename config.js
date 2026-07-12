@@ -26,8 +26,8 @@
 const CONFIG = {
 
   brand: {
-    name:     'Your Company Name',
-    tagline:  'Cover Layout Creator',
+    name:     'CoverSpec Studio',
+    tagline:  'Production-Ready Cover Specs',
   },
 
   // ── Theme tokens ───────────────────────────────────────────────

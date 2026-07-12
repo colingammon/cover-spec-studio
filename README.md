@@ -1,6 +1,6 @@
-# Cover Layout Creator
+# CoverSpec Studio
 
-A free, browser-based toolkit for book cover production. Calculate spine width, generate PDF templates, convert paper metrics, and create ISBN barcodes—no software installation required.
+Production-ready cover specifications made instant. A free, browser-based toolkit for book cover production. Calculate spine width, generate PDF templates, convert paper metrics, and create ISBN barcodes—no software installation required.
 
 ![MIT License](https://img.shields.io/badge/license-MIT-green)
 ![No dependencies](https://img.shields.io/badge/dependencies-2%20CDN-blue)
@@ -39,8 +39,8 @@ All three tools run entirely in the browser with no server backend. The applicat
 
 1. Download or clone this repository:
    ```bash
-   git clone https://github.com/colingammmon/cover-layout-creator.git
-   cd cover-layout-creator
+   git clone https://github.com/colingammon/coverspec-studio.git
+   cd coverspec-studio
    ```
 
 2. No build step needed! Simply open `index.html` in a modern browser:
@@ -137,8 +137,16 @@ ppc: {
 
 ### White-Label
 
+By default, the app displays "CoverSpec Studio" and "Production-Ready Cover Specs". To re-brand:
+
 1. Replace `logo.png` with your brand logo (36px height, transparent background)
-2. Update `CONFIG.brand.name` and `CONFIG.brand.tagline` in `config.js`
+2. Update `CONFIG.brand.name` and `CONFIG.brand.tagline` in `config.js`:
+   ```javascript
+   brand: {
+     name: 'Your Company Name',
+     tagline: 'Your tagline here',
+   }
+   ```
 3. Adjust `CONFIG.theme` colors to match your brand
 4. All changes apply immediately—no build step needed
 
@@ -219,4 +227,4 @@ For questions or issues:
 
 ---
 
-**Ready to get started?** Download, open `index.html`, and start creating cover templates!
+**Ready to get started?** Download, open `index.html`, and start generating production-ready cover specs!
