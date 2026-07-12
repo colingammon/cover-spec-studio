@@ -567,6 +567,7 @@ function cvCalculate() {
   else if (cvMode==='jacket') cvCalcJacket(pH,pW,gsm,vol,pages,hasCore);
   else if (cvMode==='ppc')    cvCalcPPC(pH,pW,gsm,vol,pages,hasCore);
   document.getElementById('btn-download').disabled=!cvState;
+  document.getElementById('btn-svg').disabled=!cvState;
   document.getElementById('btn-specs').disabled=!cvState;
   document.getElementById('btn-save-calc').disabled=!cvState;
 }

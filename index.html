@@ -496,7 +496,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
         <li><strong>Dust Jacket</strong> — printed jacket for a cased (hardback) book, with flaps and turn-ins.</li>
         <li><strong>Printed Paper Case (PPC)</strong> — printed cover wrapped directly onto hardback boards.</li>
       </ul>
-      <p style="font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:8px"><strong>How to use:</strong> Select your cover type, then enter the page trim height and width, paper grammage (weight in gsm), paper volume, and the total number of pages. Contact your Account Manager for details of paper stocks. For jackets and PPCs also select the board thickness. Results update automatically. Click <em>Download PDF Template</em> to save a to-scale vector PDF you can place directly into InDesign, Affinity Publisher, or Illustrator as a guide layer. The layouts are created at the finished size — don't forget to add a 3mm bleed allowance in your document setup.</p>
+      <p style="font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:8px"><strong>How to use:</strong> Select your cover type, then enter the page trim height and width, paper grammage (weight in gsm), paper volume, and the total number of pages. Contact your Printer for details of paper stocks. For jackets and PPCs also select the board thickness. Results update automatically. Two download options are available: <em>Download PDF Template</em> saves a to-scale vector PDF for use as a guide layer. <em>Download SVG Template</em> exports a native vector file (fully editable in Illustrator, Affinity Designer, InDesign) with all guides, dimensions, and section fills pre-configured — open it directly and place artwork on top. The layouts are created at the finished size — don't forget to add a 3mm bleed allowance in your document setup.</p>
       <p style="font-size:13px;line-height:1.75;color:var(--text-mid)">If you create a lot of covers/jackets in InDesign we highly recommend this plugin: <a href="https://www.danrodney.com/scripts/makebookjacket.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:500;text-decoration:underline;text-underline-offset:2px">danrodney.com/scripts/makebookjacket.html</a></p>
     </div>
 
@@ -633,7 +633,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
       <div class="field-group">
         <label>Binding</label>
         <div class="input-wrap">
-          <select id="binding"><option value="0">Perfect/PUR Bound</option><option value="2">Sewn</option></select>
+          <select id="binding"><option value="0">Perfect Bound/Unsewn</option><option value="2">Sewn</option></select>
           <span class="select-arrow">▾</span>
         </div>
       </div>
@@ -721,8 +721,8 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
       </div>
     </div>
 
-    <div class="alert-box" id="alert-spine-60">⚠ Spine exceeds 60mm maximum — contact your Account Manager.</div>
-    <div class="alert-box" id="alert-spine-50">⚠ Spine exceeds 50mm maximum — contact your Account Manager.</div>
+    <div class="alert-box" id="alert-spine-60">⚠ Spine exceeds 60mm maximum — Contact Your Printer.</div>
+    <div class="alert-box" id="alert-spine-50">⚠ Spine exceeds 50mm maximum — Contact Your Printer.</div>
     <div class="alert-box" id="alert-docw-580">⚠ Document width exceeds 580mm — Contact Your Printer.</div>
     <div class="alert-box" id="alert-flap-min">⚠ Flap width is below the 90mm minimum.</div>
     <div class="alert-box" id="alert-flap-max">⚠ Flap width exceeds maximum (page width − 10mm).</div>
@@ -758,6 +758,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 <div class="card-footer">
   <button class="btn-download" id="btn-download" disabled onclick="cvGeneratePDF()">Download PDF Template</button>
   <div class="btn-row">
+    <button class="btn-secondary" id="btn-svg" disabled onclick="cvDownloadSVG()">Download SVG Template</button>
     <button class="btn-secondary" id="btn-specs" disabled onclick="cvDownloadSpecs()">Download Specs (TXT)</button>
     <button class="btn-secondary" id="btn-save-calc" disabled onclick="cvSaveCalculation()">Save Calculation</button>
     <button class="btn-secondary" onclick="cvReset()">Reset</button>
@@ -919,6 +920,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 
 <script src="config.js"></script>
 <script src="script.js"></script>
+<script src="svgGenerator.js"></script>
 <script>
 // ── Apply CONFIG.theme to :root as CSS custom properties ──────────
 // This runs once on load. To re-skin the application, update
