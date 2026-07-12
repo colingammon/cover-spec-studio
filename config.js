@@ -30,6 +30,40 @@ const CONFIG = {
     tagline:  'Production-Ready Cover Specs',
   },
 
+  // ── Feature Toggles ────────────────────────────────────────────
+  // Enable or disable optional features for your deployment
+  features: {
+    enablePaperPresets:  true,    // Show paper stock preset dropdown
+    enableSaveHistory:   true,    // Save and recall recent calculations
+  },
+
+  // ── Paper Stock Presets ────────────────────────────────────────
+  // Commonly used papers in book production. Add or modify to match
+  // your suppliers. Format: { label, gsm, volume }
+  // Note: volumes are calculated from formula (microns/gsm)×10.
+  // Verify with your paper supplier and adjust as needed.
+  // Tip: To add a custom paper, manually enter gsm/volume below the
+  // dropdown without selecting a preset.
+  paperStocks: [
+    { label: '— Select a paper stock (or enter custom) —', gsm: 0, volume: 0 },
+    // Light (50-70gsm)
+    { label: 'Munken Pure 60gsm', gsm: 60, volume: 10.5 },
+    { label: 'Holmen Book Cream 60gsm', gsm: 60, volume: 9.5 },
+    { label: 'Arctic Volume 70gsm', gsm: 70, volume: 12.0 },
+    // Standard (80-90gsm)
+    { label: 'Munken Pure 80gsm', gsm: 80, volume: 13.0 },
+    { label: 'Munken Pure 90gsm', gsm: 90, volume: 14.0 },
+    { label: 'Holmen Book Cream 80gsm', gsm: 80, volume: 12.0 },
+    { label: 'Fedrigoni Cirrus 80gsm', gsm: 80, volume: 11.8 },
+    { label: 'Sappi Bookmatt 80gsm', gsm: 80, volume: 12.0 },
+    { label: 'Sappi Bookmatt 90gsm', gsm: 90, volume: 13.5 },
+    { label: 'UPM Finesse 90gsm', gsm: 90, volume: 12.8 },
+    // Premium/Textured (100gsm+)
+    { label: 'Munken Pure 100gsm', gsm: 100, volume: 15.0 },
+    { label: 'Fedrigoni Cirrus 100gsm', gsm: 100, volume: 14.8 },
+    { label: 'Arctic Volume 100gsm', gsm: 100, volume: 16.0 },
+  ],
+
   // ── Theme tokens ───────────────────────────────────────────────
   // All colour, typography, radius, and motion values used by the UI.
   // These are written into :root as CSS custom properties at init by

@@ -208,6 +208,12 @@ header {
   transition: border-color var(--dur), background var(--dur);
   -moz-appearance: textfield;
 }
+.input-wrap input::placeholder {
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.7;
+}
 .input-wrap input[type="number"]::-webkit-inner-spin-button,
 .input-wrap input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 .input-wrap input:focus          { border-color: var(--accent); background: #fff; }
@@ -554,25 +560,37 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div class="field-row">
       <div class="field-group">
         <label>Trim Height</label>
-        <div class="input-wrap"><input type="number" id="pHeight" placeholder="0" min="0"><span class="input-unit">mm</span></div>
+        <div class="input-wrap"><input type="number" id="pHeight" placeholder="(required)" min="0"><span class="input-unit">mm</span></div>
       </div>
       <div class="field-group">
         <label>Trim Width</label>
-        <div class="input-wrap"><input type="number" id="pWidth" placeholder="0" min="0"><span class="input-unit">mm</span></div>
+        <div class="input-wrap"><input type="number" id="pWidth" placeholder="(required)" min="0"><span class="input-unit">mm</span></div>
       </div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">Paper Specification</div>
+    <div class="field-row single" id="paperPresetRow" style="display:none;margin-bottom:12px">
+      <div class="field-group">
+        <label>Paper Stock Preset</label>
+        <div class="input-wrap">
+          <select id="paperStockSelect" onchange="cvApplyPaperStock()">
+            <option>Loading presets...</option>
+          </select>
+          <span class="select-arrow">▾</span>
+        </div>
+        <div class="field-hint">Select a preset (values auto-fill below), or leave blank and enter custom gsm/volume</div>
+      </div>
+    </div>
     <div class="field-row">
       <div class="field-group">
         <label>Grammage</label>
-        <div class="input-wrap"><input type="number" id="gsm" placeholder="0" min="0"><span class="input-unit">gsm</span></div>
+        <div class="input-wrap"><input type="number" id="gsm" placeholder="(required)" min="0"><span class="input-unit">gsm</span></div>
       </div>
       <div class="field-group">
         <label>Volume</label>
-        <div class="input-wrap"><input type="number" id="volume" placeholder="0.0" min="0" step="0.1"></div>
+        <div class="input-wrap"><input type="number" id="volume" placeholder="(required)" min="0" step="0.1"></div>
       </div>
     </div>
   </div>
@@ -582,7 +600,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div class="field-row single">
       <div class="field-group">
         <label>Number of Pages</label>
-        <div class="input-wrap"><input type="number" id="numPages" placeholder="0" min="0"><span class="input-unit">pp</span></div>
+        <div class="input-wrap"><input type="number" id="numPages" placeholder="(required)" min="0"><span class="input-unit">pp</span></div>
       </div>
     </div>
   </div>
@@ -708,10 +726,29 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div class="pdf-spec" id="pdf-spec-empty" style="color:var(--text-dim)">Select cover type and enter values above.</div>
   </div>
 
+  <div class="section" id="savedCalcsSection" style="display:none">
+    <div class="section-title">Saved Calculations</div>
+    <div class="field-row single">
+      <div class="field-group">
+        <label>Load a Saved Calculation</label>
+        <div class="input-wrap">
+          <select id="savedDropdown" onchange="cvLoadSaved(this.value); this.value=''">
+            <option value="">No saved calculations</option>
+          </select>
+          <span class="select-arrow">▾</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-secondary" style="width:100%;margin-top:8px" onclick="cvClearAllSaved()">Delete All Saved</button>
+  </div>
+
 </div><!-- /card-body -->
 <div class="card-footer">
   <button class="btn-download" id="btn-download" disabled onclick="cvGeneratePDF()">Download PDF Template</button>
-  <div class="btn-row"><button class="btn-secondary" onclick="cvReset()">Reset</button></div>
+  <div class="btn-row">
+    <button class="btn-secondary" id="btn-save-calc" disabled onclick="cvSaveCalculation()">Save Calculation</button>
+    <button class="btn-secondary" onclick="cvReset()">Reset</button>
+  </div>
   <p class="note" id="footer-note">PDF page = trim size. Guides drawn as vector marks.</p>
 </div>
 </div>
@@ -880,5 +917,24 @@ function showTab(t) {
 // Init cover calculator
 document.addEventListener('DOMContentLoaded', cvInit);
 </script>
+
+<!-- ── SAVE CALCULATION MODAL ── -->
+<div id="saveModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:28px;width:100%;max-width:400px;box-shadow:rgba(0,0,0,0.2) 0 4px 20px">
+    <h2 style="font-family:var(--font);font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;text-align:center">Save Calculation</h2>
+
+    <div style="margin-bottom:20px">
+      <label style="display:block;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-mid);margin-bottom:8px">Name (optional)</label>
+      <input type="text" id="saveCalcName" placeholder="e.g. Jacket A5" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r-xs);font-family:var(--font);font-size:14px;box-sizing:border-box;color:var(--text);background:var(--bg);outline:none" />
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px">Leave blank for auto-generated name</div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="cvCancelSave()" style="flex:1;padding:10px;background:transparent;border:1.5px solid var(--border-dark);border-radius:var(--r-xs);color:var(--text-mid);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all 300ms">Cancel</button>
+      <button onclick="cvConfirmSave()" style="flex:1;padding:10px;background:var(--accent);border:none;border-radius:var(--r-xs);color:#000;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all 300ms">Save</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

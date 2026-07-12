@@ -13,6 +13,9 @@ Production-ready cover specifications made instant. A free, browser-based toolki
 - Automatically compute spine width from paper specifications (gsm, volume, extent)
 - Generate to-scale vector PDF templates for use in InDesign, Affinity Publisher, or Illustrator
 - Customizable production constraints and alerts
+- **Paper Stock Presets** — select from common stocks or enter custom values
+- **Save Calculations** — manually save specs you want to reuse with custom names
+- **Red text in PDFs** — all text and guides render in red for maximum visibility
 
 **Micron → Volume Converter**
 - Convert paper thickness (microns) to paper volume (bulk factor)
@@ -66,14 +69,16 @@ All three tools run entirely in the browser with no server backend. The applicat
 ### Cover Templates
 
 1. Select your cover type (Limp, Limp with Flaps, Dust Jacket, or PPC)
-2. Enter page trim dimensions (height × width in mm)
-3. Enter paper grammage (gsm) and volume
-4. Enter total extent (number of pages)
-5. For flap covers, specify flap width; for jackets/PPC, select board thickness
-6. Results update in real-time
-7. Click **Download PDF Template** to save a to-scale PDF
+2. **Optionally select a paper stock preset** to auto-fill gsm and volume
+3. Enter page trim dimensions (height × width in mm)
+4. Enter paper grammage (gsm) and volume (or use preset)
+5. Enter total extent (number of pages)
+6. For flap covers, specify flap width; for jackets/PPC, select board thickness
+7. Results update in real-time
+8. Click **Download PDF Template** to save a to-scale PDF with red text guides
+9. **Optionally click Save Calculation** to store this spec with a custom name for future use
 
-The generated PDF is trim size (no bleed padding) with spine boundaries and fold guides as vector lines.
+The generated PDF is trim size (no bleed padding) with spine boundaries, fold guides, and all text in red for visibility.
 
 ### Micron to Volume
 
@@ -92,7 +97,34 @@ The generated PDF is trim size (no bleed padding) with spine boundaries and fold
 
 ## Customization
 
-All production rules and user-facing messages live in **`config.js`**. Modify these without touching the JavaScript:
+All production rules and user-facing messages live in **`config.js`**. Modify these without touching the JavaScript. See the inline comments in `config.js` for detailed guidance.
+
+### Paper Stock Presets
+
+Customize available paper stocks in the dropdown:
+
+```javascript
+paperStocks: [
+  { label: '— Select a paper stock (or enter custom) —', gsm: 0, volume: 0 },
+  { label: 'Munken Pure 80gsm', gsm: 80, volume: 13.0 },
+  { label: 'Your Custom Paper', gsm: 90, volume: 14.5 },  // Add your own
+]
+```
+
+Users can select a preset to auto-fill paper specs, or leave blank and enter custom values.
+
+### Saved Calculations
+
+Enable/disable the saved calculations feature:
+
+```javascript
+features: {
+  enablePaperPresets: true,      // Show paper stock preset dropdown
+  enableSaveHistory: true,       // Allow users to save calculations
+}
+```
+
+Users can click "Save Calculation" to store specs they want to reuse, organized by custom names stored in browser localStorage.
 
 ### Change Production Limits
 
@@ -109,7 +141,7 @@ jacket: {
 
 ```javascript
 alerts: {
-  spine60: '⚠ Spine too large — contact sales@example.com',
+  spine60: '⚠ Spine too large — contact your Account Manager.',
   // ... other messages
 }
 ```
@@ -137,20 +169,16 @@ ppc: {
 
 ### White-Label
 
-By default, the app displays "CoverSpec Studio" and "Production-Ready Cover Specs". To re-brand:
+The app ships with "CoverSpec Studio" and "Production-Ready Cover Specs" as defaults. To re-brand:
 
 1. Replace `logo.png` with your brand logo (36px height, transparent background)
-2. Update `CONFIG.brand.name` and `CONFIG.brand.tagline` in `config.js`:
-   ```javascript
-   brand: {
-     name: 'Your Company Name',
-     tagline: 'Your tagline here',
-   }
-   ```
-3. Adjust `CONFIG.theme` colors to match your brand
-4. All changes apply immediately—no build step needed
-
-See `config.js` for a detailed customization guide.
+2. Update `CONFIG.brand.name` and `CONFIG.brand.tagline` in `config.js`
+3. Customize `CONFIG.paperStocks` to your paper suppliers
+4. Update `CONFIG.theme` colors to match your brand identity
+5. Update alert messages in `CONFIG.alerts` to reference your support process
+6. Enable/disable features in `CONFIG.features`
+7. Update PDF template titles in `CONFIG.coverTypes[mode].templateTitle` if needed
+8. All changes apply immediately—no code modifications needed
 
 ## Spine Calculation Formulas
 
@@ -184,6 +212,7 @@ Works on all modern browsers (Chrome, Firefox, Safari, Edge). Requires:
 - ES6 JavaScript support
 - Canvas API (for barcode preview)
 - CSS Grid and Flexbox
+- localStorage (for saved calculations)
 
 ## Dependencies
 
@@ -201,6 +230,7 @@ Both loaded from CDN. No npm install or build step needed.
 - **Spine rounded before document width.** Rounding is applied immediately to prevent float precision errors between displayed spine and computed docW.
 - **Board thickness required for Jacket/PPC.** An alert fires if the user forgets to select a board size, since the spine calculation is materially affected.
 - **Height × Width convention.** All dimensions follow `H × W mm` to match industry standards for book formats.
+- **Manual save for calculations.** Users must explicitly click "Save Calculation" to store specs—no auto-saving of history.
 
 ## License
 
@@ -222,7 +252,7 @@ Found a bug? Have a feature request? Open an issue or submit a pull request.
 
 For questions or issues:
 1. Check the **Introduction** tab in the app for how-to guidance
-2. Review the customization comments in `config.js` 
+2. Review the customization comments in `config.js`
 3. Open an issue on GitHub with a description and steps to reproduce
 
 ---

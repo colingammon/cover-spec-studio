@@ -371,14 +371,14 @@ function cvHelpers(doc) {
   }
   function notes(pageW,pageH,l1,l2) {
     const nY=pageH*CONFIG.pdf.noteY;
-    txt(pageW/2,nY,    l1,11,true,[40,40,40]);
-    txt(pageW/2,nY+5.5,l2,11,true,[40,40,40]);
+    txt(pageW/2,nY,    l1,11,true,[200,0,0]);
+    txt(pageW/2,nY+5.5,l2,11,true,[200,0,0]);
   }
   function infoBlock(pageW,pageH,t1,t2,t3) {
     const iY=pageH*CONFIG.pdf.infoY;
-    txt(pageW/2,iY,        t1,11,true,[40,40,40]);
-    txt(pageW/2,iY+5.5,    t2,11,true,[40,40,40]);
-    txt(pageW/2,iY+12.5,   t3,11,true,[40,40,40]);
+    txt(pageW/2,iY,        t1,11,true,[200,0,0]);
+    txt(pageW/2,iY+5.5,    t2,11,true,[200,0,0]);
+    txt(pageW/2,iY+12.5,   t3,11,true,[200,0,0]);
   }
   return {str,fill,ln,dash,txt,notes,infoBlock};
 }
@@ -405,6 +405,8 @@ function cvPopulateBoardSelect() {
 
 function cvInit() {
   cvPopulateBoardSelect();
+  cvPopulatePaperPresets();
+  cvUpdateSavedUI();
   CORE_IDS.forEach(id=>document.getElementById(id).addEventListener('input',cvCalculate));
   ['flapWidth','jacketFlapWidth','binding','boardThickness','ppcType'].forEach(id=>
     document.getElementById(id).addEventListener('input',cvCalculate));
@@ -461,6 +463,7 @@ function cvCalculate() {
   else if (cvMode==='jacket') cvCalcJacket(pH,pW,gsm,vol,pages,hasCore);
   else if (cvMode==='ppc')    cvCalcPPC(pH,pW,gsm,vol,pages,hasCore);
   document.getElementById('btn-download').disabled=!cvState;
+  document.getElementById('btn-save-calc').disabled=!cvState;
 }
 
 // ── LIMP ─────────────────────────────────────────────────────────
@@ -594,11 +597,11 @@ function pdfLimp() {
   str(80,80,80,0.3);dash(spineCx,0,spineCx,pageH,3,2);
   str(80,80,80,0.3);dash(bx-HINGE,0,bx-HINGE,pageH,2,1.5);dash(sx+HINGE,0,sx+HINGE,pageH,2,1.5);
 
-  txt(midBx,midY-5,'BACK COVER',14,true,[60,60,60]);
+  txt(midBx,midY-5,'BACK COVER',14,true,[220,0,0]);
   txt(midBx,midY+5,`${cvFmt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
-  txt(midFx,midY-5,'FRONT COVER',14,true,[60,60,60]);
+  txt(midFx,midY-5,'FRONT COVER',14,true,[220,0,0]);
   txt(midFx,midY+5,`${cvFmt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',11,true,[40,40,40]);txt(spineCx,midY+5,`${cvFmt(spine)} mm`,9,false,[80,80,80]);}
+  if(spine>=10){txt(spineCx,midY-4,'SPINE',11,true,[200,0,0]);txt(spineCx,midY+5,`${cvFmt(spine)} mm`,9,false,[240,80,80]);}
   else if(spine>=4){txt(spineCx,midY,`${cvFmt(spine)}mm`,8,true,[40,40,40],'center',90);}
 
   notes(pageW,pageH,'A 3mm hinge will be created as part of the manufacturing process','Avoid type matter running into this area');
@@ -637,12 +640,12 @@ function pdfFlaps() {
 
   // Panel labels — no FOLD annotations
   txt(flapW/2,     midY,'BACK FLAP',  11,true,[80,80,80]);
-  txt(x1+coverW/2, midY-5,'BACK COVER',14,true,[60,60,60]);
+  txt(x1+coverW/2, midY-5,'BACK COVER',14,true,[220,0,0]);
   txt(x1+coverW/2, midY+5,`${cvFmt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x3+coverW/2, midY-5,'FRONT COVER',14,true,[60,60,60]);
+  txt(x3+coverW/2, midY-5,'FRONT COVER',14,true,[220,0,0]);
   txt(x3+coverW/2, midY+5,`${cvFmt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
   txt(x4+flapW/2,  midY,'FRONT FLAP', 11,true,[80,80,80]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[40,40,40]);txt(spineCx,midY+4,`${cvFmt(spine)} mm`,8,false,[80,80,80]);}
+  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmt(spine)} mm`,8,false,[240,80,80]);}
   else if(spine>=4){txt(spineCx,midY,`${cvFmt(spine)}mm`,7,true,[40,40,40],'center',90);}
 
   notes(pageW,pageH,'A 3mm hinge will be created as part of the manufacturing process','Avoid type matter running into this area — ensure artwork extends to fold');
@@ -683,17 +686,17 @@ function pdfJacket() {
 
   // Panel labels — no TURN-IN vertical annotations
   txt(flapW/2,     midY,'BACK FLAP',  11,true,[80,80,80]);
-  txt(x2+coverW/2, midY-5,'BACK COVER',14,true,[60,60,60]);
+  txt(x2+coverW/2, midY-5,'BACK COVER',14,true,[220,0,0]);
   txt(x2+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x4+coverW/2, midY-5,'FRONT COVER',14,true,[60,60,60]);
+  txt(x4+coverW/2, midY-5,'FRONT COVER',14,true,[220,0,0]);
   txt(x4+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
   txt(x6+flapW/2,  midY,'FRONT FLAP', 11,true,[80,80,80]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[40,40,40]);txt(spineCx,midY+4,`${cvFmtInt(spine)} mm`,8,false,[80,80,80]);}
+  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmtInt(spine)} mm`,8,false,[240,80,80]);}
   else if(spine>=4){txt(spineCx,midY,`${cvFmtInt(spine)}mm`,7,true,[40,40,40],'center',90);}
 
   const nY=pageH*CONFIG.pdf.noteY;
-  txt(pageW/2,nY,    'Ensure artwork extends into the 10mm turn-in allowance',11,true,[40,40,40]);
-  txt(pageW/2,nY+5.5,'Extend fore-edge bleeds into the turn-in area',11,true,[40,40,40]);
+  txt(pageW/2,nY,    'Ensure artwork extends into the 10mm turn-in allowance',11,true,[200,0,0]);
+  txt(pageW/2,nY+5.5,'Extend fore-edge bleeds into the turn-in area',11,true,[200,0,0]);
   infoBlock(pageW,pageH,
     'Cover Layout — Dust Jacket Template',
     `Doc: ${cvFmtInt(docH)} × ${cvFmtInt(docW)} mm  |  Spine: ${cvFmtInt(spine)} mm  |  Flap: ${cvFmt(flapW)} mm  |  Boards: ${cvState.boardVal}mm`,
@@ -732,11 +735,11 @@ function pdfPPC() {
   txt(x1+trimW/2, trimBot+7,     '15mm wraparound',9,true,[80,80,80]);
 
   // Panel labels — no vertical FOLD annotations, no vertical side labels
-  txt(x1+coverW/2, midY-5,'BACK COVER',  14,true,[60,60,60]);
+  txt(x1+coverW/2, midY-5,'BACK COVER',  14,true,[220,0,0]);
   txt(x1+coverW/2, midY+5,`${cvFmtInt(trimH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x5+coverW/2, midY-5,'FRONT COVER', 14,true,[60,60,60]);
+  txt(x5+coverW/2, midY-5,'FRONT COVER', 14,true,[220,0,0]);
   txt(x5+coverW/2, midY+5,`${cvFmtInt(trimH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[40,40,40]);txt(spineCx,midY+4,`${cvFmtInt(spine)} mm`,8,false,[80,80,80]);}
+  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmtInt(spine)} mm`,8,false,[240,80,80]);}
   else if(spine>=4){txt(spineCx,midY,`${cvFmtInt(spine)}mm`,7,true,[40,40,40],'center',90);}
 
   // Gutter dimension labels
@@ -744,8 +747,8 @@ function pdfPPC() {
   txt(x4+gutter/2, trimTop+8,`${gutter}mm`,8,true,[80,80,80]);
 
   const nY=pageH*CONFIG.pdf.noteY;
-  txt(pageW/2,nY,    'Avoid type matter going into the gutter allowance',11,true,[40,40,40]);
-  txt(pageW/2,nY+5.5,'Ensure artwork extends into the 15mm wraparound',11,true,[40,40,40]);
+  txt(pageW/2,nY,    'Avoid type matter going into the gutter allowance',11,true,[200,0,0]);
+  txt(pageW/2,nY+5.5,'Ensure artwork extends into the 15mm wraparound',11,true,[200,0,0]);
   infoBlock(pageW,pageH,
     'Cover Layout — PPC Template',
     `Doc: ${cvFmtInt(docH)} × ${cvFmtInt(docW)} mm  |  Trim: ${cvFmtInt(trimH)} × ${cvFmtInt(trimW)} mm  |  Spine: ${cvFmtInt(spine)} mm  |  Gutter: ${gutter}mm  |  Boards: ${cvState.boardVal}mm`,
@@ -762,4 +765,169 @@ function cvReset() {
   cvState=null;
   cvClearAlerts();
   cvCalculate();
+}
+
+// ── PAPER STOCK PRESETS ────────────────────────────────────────────
+function cvPopulatePaperPresets() {
+  if (!CONFIG.features.enablePaperPresets) return;
+
+  const row = document.getElementById('paperPresetRow');
+  const select = document.getElementById('paperStockSelect');
+
+  select.innerHTML = '';
+  CONFIG.paperStocks.forEach(stock => {
+    const option = document.createElement('option');
+    option.value = `${stock.gsm},${stock.volume}`;
+    option.textContent = stock.label;
+    select.appendChild(option);
+  });
+
+  row.style.display = 'block';
+}
+
+function cvApplyPaperStock() {
+  const select = document.getElementById('paperStockSelect');
+  const [gsm, volume] = select.value.split(',');
+
+  if (gsm > 0) {
+    document.getElementById('gsm').value = gsm;
+    document.getElementById('volume').value = volume;
+    // Keep selection visible instead of resetting
+    cvCalculate();
+  }
+}
+
+// ── SAVE & LOAD SAVED CALCULATIONS ────────────────────────────────
+function cvSaveCalculation() {
+  if (!CONFIG.features.enableSaveHistory) return;
+
+  // Show modal
+  const modal = document.getElementById('saveModal');
+  const input = document.getElementById('saveCalcName');
+
+  // Pre-fill with default name
+  const defaultName = `${cvMode.charAt(0).toUpperCase() + cvMode.slice(1)} • ${document.getElementById('pHeight').value}×${document.getElementById('pWidth').value}`;
+  input.value = defaultName;
+  input.focus();
+  input.select();
+
+  // Store default for use in confirm
+  cvSaveData = { defaultName };
+
+  // Show modal
+  modal.style.display = 'flex';
+
+  // Close modal on escape key
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      cvCancelSave();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
+
+function cvConfirmSave() {
+  if (!CONFIG.features.enableSaveHistory) return;
+
+  const modal = document.getElementById('saveModal');
+  const input = document.getElementById('saveCalcName');
+  const name = input.value.trim() || cvSaveData.defaultName;
+
+  const entry = {
+    id: Date.now(),
+    name: name,
+    timestamp: Date.now(),
+    mode: cvMode,
+    inputs: {
+      pHeight: document.getElementById('pHeight').value,
+      pWidth: document.getElementById('pWidth').value,
+      gsm: document.getElementById('gsm').value,
+      volume: document.getElementById('volume').value,
+      numPages: document.getElementById('numPages').value,
+      flapWidth: document.getElementById('flapWidth').value || '',
+      jacketFlapWidth: document.getElementById('jacketFlapWidth').value || '',
+      binding: document.getElementById('binding').value || '0',
+      boardThickness: document.getElementById('boardThickness').value || '0',
+      ppcType: document.getElementById('ppcType').value || 'round'
+    }
+  };
+
+  let saved = JSON.parse(localStorage.getItem('coverspec_saved') || '[]');
+  saved.push(entry);
+  localStorage.setItem('coverspec_saved', JSON.stringify(saved));
+  cvUpdateSavedUI();
+
+  // Close modal
+  modal.style.display = 'none';
+}
+
+function cvCancelSave() {
+  const modal = document.getElementById('saveModal');
+  modal.style.display = 'none';
+}
+
+function cvLoadSaved(id) {
+  if (!id) return;
+
+  const saved = JSON.parse(localStorage.getItem('coverspec_saved') || '[]');
+  const entry = saved.find(e => e.id == id);
+
+  if (!entry) return;
+
+  // Restore mode
+  cvSetMode(entry.mode);
+
+  // Restore inputs
+  Object.entries(entry.inputs).forEach(([fieldId, value]) => {
+    const el = document.getElementById(fieldId);
+    if (el) el.value = value;
+  });
+
+  // Reset dropdown
+  document.getElementById('savedDropdown').value = '';
+
+  cvCalculate();
+}
+
+function cvUpdateSavedUI() {
+  if (!CONFIG.features.enableSaveHistory) return;
+
+  const saved = JSON.parse(localStorage.getItem('coverspec_saved') || '[]');
+  const section = document.getElementById('savedCalcsSection');
+  const dropdown = document.getElementById('savedDropdown');
+
+  if (saved.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  dropdown.innerHTML = '<option value="">Load a saved calculation...</option>';
+
+  // Sort by most recent first
+  saved.sort((a, b) => b.timestamp - a.timestamp);
+
+  saved.forEach(entry => {
+    const option = document.createElement('option');
+    option.value = entry.id;
+    option.textContent = entry.name;
+    dropdown.appendChild(option);
+  });
+}
+
+function cvDeleteSaved(id) {
+  if (!confirm('Delete this saved calculation?')) return;
+
+  let saved = JSON.parse(localStorage.getItem('coverspec_saved') || '[]');
+  saved = saved.filter(e => e.id != id);
+  localStorage.setItem('coverspec_saved', JSON.stringify(saved));
+  cvUpdateSavedUI();
+}
+
+function cvClearAllSaved() {
+  if (confirm('Delete all saved calculations?')) {
+    localStorage.removeItem('coverspec_saved');
+    cvUpdateSavedUI();
+  }
 }
