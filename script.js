@@ -87,19 +87,24 @@ function formatISBNDisplay(digits13) {
 // BARCODE CANVAS RENDERER
 // ═══════════════════════════════════════════════════════════════════
 
-function renderBarcodeToContext(ctx, digits13, addon, originX, originY, widthPx, heightPx) {
+function renderBarcodeToContext(ctx, digits13, addon, originX, originY, widthPx, heightPx, options={}) {
   const addonEncoded = addon ? encodeAddon(addon) : null;
   const hasAddon = !!addonEncoded;
-  const topLabel = formatISBNDisplay(digits13);
+  const showLabel = options.showLabel !== false;
+  const showDigits = options.showDigits !== false;
+  const showAddonDigits = options.showAddonDigits !== false;
+  const fontScale = options.fontScale || 1.0;
+  const isbnFormat = options.isbnFormat || 'formatted';
+  const topLabel = isbnFormat === 'formatted' ? formatISBNDisplay(digits13) : 'ISBN '+digits13;
 
   function setFont(size, bold) {
     ctx.font = (bold?'bold ':'')+size+'px "Helvetica Neue",Helvetica,Arial,sans-serif';
   }
 
-  const topFontSize = Math.max(1, heightPx*0.072);
-  const numFontSize = Math.max(1, heightPx*0.080);
-  const topTextH    = Math.round(topFontSize*1.5);
-  const bottomTextH = Math.round(numFontSize*1.6);
+  const topFontSize = Math.max(1, heightPx*0.072*fontScale);
+  const numFontSize = Math.max(1, heightPx*0.080*fontScale);
+  const topTextH    = showLabel ? Math.round(topFontSize*1.5) : 0;
+  const bottomTextH = showDigits ? Math.round(numFontSize*1.6) : 0;
   const barAreaH    = heightPx - topTextH - bottomTextH;
   const guardExtend = Math.round(bottomTextH*0.55);
   const mainBarH    = barAreaH;
@@ -129,9 +134,9 @@ function renderBarcodeToContext(ctx, digits13, addon, originX, originY, widthPx,
     }
   }
 
-  if (hasAddon) {
+  if (hasAddon && showAddonDigits) {
     const {bits:addonBits, digitCount} = addonEncoded;
-    const addonNumFontSz = Math.max(5, Math.min(barAreaH*0.18, (addonEncoded.modules*moduleW)/digitCount*0.75));
+    const addonNumFontSz = Math.max(5, Math.min(barAreaH*0.18, (addonEncoded.modules*moduleW)/digitCount*0.75)*fontScale);
     setFont(addonNumFontSz);
     ctx.textBaseline='top'; ctx.textAlign='center';
     const addonNumY = barY + barAreaH*0.03;
@@ -143,42 +148,62 @@ function renderBarcodeToContext(ctx, digits13, addon, originX, originY, widthPx,
     for (let i=0;i<addonBits.length;i++) {
       if(addonBits[i]==='1') ctx.fillRect(addonStartX+i*moduleW, addonBarTopY, moduleW, mainBarH*0.5);
     }
+  } else if (hasAddon) {
+    const {bits:addonBits} = addonEncoded;
+    for (let i=0;i<addonBits.length;i++) {
+      if(addonBits[i]==='1') {
+        const addonBarTopY = barY + barAreaH*0.5;
+        ctx.fillRect(addonStartX+i*moduleW, addonBarTopY, moduleW, mainBarH*0.5);
+      }
+    }
   }
 
-  setFont(topFontSize, true);
-  ctx.textAlign='left'; ctx.textBaseline='middle';
-  ctx.fillText(topLabel, barcodeStartX, originY+topTextH*0.5);
+  const firstDigitX = originX+(barcodeStartX-originX)*0.5;
+  const labelX = originX + 4*moduleW;
 
-  setFont(numFontSize);
-  ctx.textBaseline='middle'; ctx.textAlign='center';
-  const guardBottomY = barY + guardBarH;
-  const numY = guardBottomY + bottomTextH*0.02;
+  if (showLabel) {
+    setFont(topFontSize, true);
+    ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(topLabel, labelX, originY+topTextH*0.5);
+  }
 
-  ctx.fillText(digits13[0], originX+(barcodeStartX-originX)*0.5, numY);
-  for (let i=0;i<6;i++) ctx.fillText(digits13[i+1], barcodeStartX+(3+i*7+3.5)*moduleW, numY);
-  for (let i=0;i<6;i++) ctx.fillText(digits13[i+7], barcodeStartX+(50+i*7+3.5)*moduleW, numY);
+  if (showDigits) {
+    setFont(numFontSize);
+    ctx.textBaseline='middle'; ctx.textAlign='center';
+    const guardBottomY = barY + guardBarH;
+    const numY = guardBottomY + bottomTextH*0.02;
+
+    ctx.fillText(digits13[0], firstDigitX, numY);
+    for (let i=0;i<6;i++) ctx.fillText(digits13[i+1], barcodeStartX+(3+i*7+3.5)*moduleW, numY);
+    for (let i=0;i<6;i++) ctx.fillText(digits13[i+7], barcodeStartX+(50+i*7+3.5)*moduleW, numY);
+  }
 }
 
-function renderBarcode(canvas, digits13, addon, widthPx, heightPx) {
+function renderBarcode(canvas, digits13, addon, widthPx, heightPx, options={}) {
   canvas.width=widthPx; canvas.height=heightPx;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,widthPx,heightPx);
-  renderBarcodeToContext(ctx, digits13, addon, 0, 0, widthPx, heightPx);
+  renderBarcodeToContext(ctx, digits13, addon, 0, 0, widthPx, heightPx, options);
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // BARCODE PDF RENDERER
 // ═══════════════════════════════════════════════════════════════════
 
-function renderBarcodeToPDF(pdf, digits13, addon, originX, originY, wMM, hMM) {
+function renderBarcodeToPDF(pdf, digits13, addon, originX, originY, wMM, hMM, options={}) {
   const addonEncoded = addon ? encodeAddon(addon) : null;
   const hasAddon = !!addonEncoded;
-  const topLabel = formatISBNDisplay(digits13);
+  const showLabel = options.showLabel !== false;
+  const showDigits = options.showDigits !== false;
+  const showAddonDigits = options.showAddonDigits !== false;
+  const fontScale = options.fontScale || 1.0;
+  const isbnFormat = options.isbnFormat || 'formatted';
+  const topLabel = isbnFormat === 'formatted' ? formatISBNDisplay(digits13) : 'ISBN '+digits13;
 
-  const topFontMM   = Math.max(0.5, hMM*0.072);
-  const numFontMM   = Math.max(0.5, hMM*0.080);
-  const topTextH    = topFontMM*1.5;
-  const bottomTextH = numFontMM*1.6;
+  const topFontMM   = Math.max(0.5, hMM*0.072*fontScale);
+  const numFontMM   = Math.max(0.5, hMM*0.080*fontScale);
+  const topTextH    = showLabel ? topFontMM*1.5 : 0;
+  const bottomTextH = showDigits ? numFontMM*1.6 : 0;
   const barAreaH    = hMM - topTextH - bottomTextH;
   const guardExtend = bottomTextH*0.55;
   const mainBarH    = barAreaH;
@@ -208,9 +233,9 @@ function renderBarcodeToPDF(pdf, digits13, addon, originX, originY, wMM, hMM) {
     }
   }
 
-  if (hasAddon) {
+  if (hasAddon && showAddonDigits) {
     const {bits:addonBits, digitCount} = addonEncoded;
-    const addonNumFontMM = Math.max(1.5, Math.min(barAreaH*0.18, (addonEncoded.modules*moduleW)/digitCount*0.75));
+    const addonNumFontMM = Math.max(1.5, Math.min(barAreaH*0.18, (addonEncoded.modules*moduleW)/digitCount*0.75)*fontScale);
     pdf.setFontSize(addonNumFontMM*2.8346);
     const addonNumY    = barY + barAreaH*0.03;
     const addonBarTopY = addonNumY + addonNumFontMM*1.25;
@@ -220,18 +245,33 @@ function renderBarcodeToPDF(pdf, digits13, addon, originX, originY, wMM, hMM) {
     for (let i=0;i<addonBits.length;i++) {
       if(addonBits[i]==='1') pdf.rect(addonStartX+i*moduleW, addonBarTopY, moduleW, mainBarH*0.5, 'F');
     }
+  } else if (hasAddon) {
+    const {bits:addonBits} = addonEncoded;
+    for (let i=0;i<addonBits.length;i++) {
+      if(addonBits[i]==='1') {
+        const addonBarTopY = barY + barAreaH*0.5;
+        pdf.rect(addonStartX+i*moduleW, addonBarTopY, moduleW, mainBarH*0.5, 'F');
+      }
+    }
   }
 
-  pdf.setFontSize(topFontMM*1.15*2.8346);
-  pdf.text(topLabel, barcodeStartX, originY+topTextH*0.5+topFontMM*0.35);
+  const firstDigitX = originX+(barcodeStartX-originX)*0.5;
+  const labelX = originX + 4*moduleW;
 
-  pdf.setFontSize(numFontMM*2.8346);
-  const guardBottomY = barY + guardBarH;
-  const numY = guardBottomY + bottomTextH*0.02;
+  if (showLabel) {
+    pdf.setFontSize(topFontMM*1.15*2.8346);
+    pdf.text(topLabel, labelX, originY+topTextH*0.5+topFontMM*0.35);
+  }
 
-  pdf.text(digits13[0], originX+(barcodeStartX-originX)*0.5, numY, {align:'center'});
-  for (let i=0;i<6;i++) pdf.text(digits13[i+1], barcodeStartX+(3+i*7+3.5)*moduleW, numY, {align:'center'});
-  for (let i=0;i<6;i++) pdf.text(digits13[i+7], barcodeStartX+(50+i*7+3.5)*moduleW, numY, {align:'center'});
+  if (showDigits) {
+    pdf.setFontSize(numFontMM*2.8346);
+    const guardBottomY = barY + guardBarH;
+    const numY = guardBottomY + bottomTextH*0.02;
+
+    pdf.text(digits13[0], firstDigitX, numY, {align:'center'});
+    for (let i=0;i<6;i++) pdf.text(digits13[i+1], barcodeStartX+(3+i*7+3.5)*moduleW, numY, {align:'center'});
+    for (let i=0;i<6;i++) pdf.text(digits13[i+7], barcodeStartX+(50+i*7+3.5)*moduleW, numY, {align:'center'});
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -244,6 +284,23 @@ function mmToPx(mm, dpi) { return Math.round(mm*dpi/25.4); }
 function bcGetNum(id, fb) { const v=parseFloat(document.getElementById(id).value); return isNaN(v)?fb:v; }
 function bcWidthMM()  { return Math.min(100, Math.max(20, bcGetNum('bcWidth',  38))); }
 function bcHeightMM() { return Math.min(80,  Math.max(5,  bcGetNum('bcHeight', 27))); }
+
+function bcCheckTextFit(digits13, fontScale) {
+  if (!digits13) return true;
+  const isbnFormat = document.getElementById('bcIsbnFormat').value;
+  const topLabel = isbnFormat === 'formatted' ? formatISBNDisplay(digits13) : 'ISBN '+digits13;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const fontSizePx = Math.max(1, mmToPx(bcHeightMM(), 96)*0.072*fontScale);
+  ctx.font = 'bold '+fontSizePx+'px "Helvetica Neue",Helvetica,Arial,sans-serif';
+  const textWidth = ctx.measureText(topLabel).width;
+
+  const barcodeWidthPx = mmToPx(bcWidthMM(), 96);
+  const padding = barcodeWidthPx * 0.15;
+
+  return textWidth < (barcodeWidthPx - padding);
+}
 
 function bcShowError(msg) {
   const el = document.getElementById('bc-error');
@@ -269,10 +326,26 @@ function bcUpdatePreview() {
   const wPx = mmToPx(bcWidthMM(), 96);
   const hPx = mmToPx(bcHeightMM(), 96);
   const canvas = document.getElementById('bc-canvas');
-  renderBarcode(canvas, bcDigits13, bcAddon, wPx, hPx);
+
+  const fontScale = parseFloat(document.getElementById('bcFontScale').value) / 100;
+  const showLabel = document.getElementById('bcShowLabel').checked;
+
+  const options = {
+    showLabel: showLabel,
+    showDigits: document.getElementById('bcShowDigits').checked,
+    showAddonDigits: document.getElementById('bcShowAddonDigits').checked,
+    fontScale: fontScale,
+    isbnFormat: document.getElementById('bcIsbnFormat').value
+  };
+
+  renderBarcode(canvas, bcDigits13, bcAddon, wPx, hPx, options);
   document.getElementById('bc-preview-wrap').style.display = 'block';
   document.getElementById('bc-download').disabled = false;
   document.getElementById('bc-size-label').textContent = `${bcWidthMM()} × ${bcHeightMM()} mm`;
+
+  if (showLabel && !bcCheckTextFit(bcDigits13, fontScale)) {
+    bcShowError('⚠ Text size exceeds barcode width. Reduce font size or increase barcode width.');
+  }
 }
 
 function bcDownloadPDF() {
@@ -282,12 +355,28 @@ function bcDownloadPDF() {
   const pdf = new jsPDF({ orientation: wMM>hMM?'landscape':'portrait', unit:'mm', format:[wMM,hMM], putOnlyUsedFonts:true });
   registerEmbeddedFont(pdf);
   pdf.setFont('NotoSans','normal');
-  renderBarcodeToPDF(pdf, bcDigits13, bcAddon, 0, 0, wMM, hMM);
+
+  const options = {
+    showLabel: document.getElementById('bcShowLabel').checked,
+    showDigits: document.getElementById('bcShowDigits').checked,
+    showAddonDigits: document.getElementById('bcShowAddonDigits').checked,
+    fontScale: parseFloat(document.getElementById('bcFontScale').value) / 100,
+    isbnFormat: document.getElementById('bcIsbnFormat').value
+  };
+
+  renderBarcodeToPDF(pdf, bcDigits13, bcAddon, 0, 0, wMM, hMM, options);
   pdf.save('isbn-'+bcDigits13+(bcAddon?'-'+bcAddon:'')+'.pdf');
 }
 
 function bcClear() {
   ['bcIsbn','bcAddon'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('bcWidth').value = '38';
+  document.getElementById('bcHeight').value = '27';
+  document.getElementById('bcShowLabel').checked = true;
+  document.getElementById('bcShowDigits').checked = true;
+  document.getElementById('bcShowAddonDigits').checked = true;
+  document.getElementById('bcFontScale').value = '100';
+  document.getElementById('bcIsbnFormat').value = 'formatted';
   bcDigits13=''; bcAddon='';
   bcHideError();
   document.getElementById('bc-preview-wrap').style.display='none';
