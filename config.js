@@ -138,7 +138,7 @@ const CONFIG = {
       spineBaseline:  0.65,        // baseline mm added to spine calculation
       spineRoundMm:   false,       // round to 1 decimal place
       maxSpineMm:     50,          // alert triggers if calculated spine > this (stricter than limp)
-      maxDocWMm:      530,         // alert triggers if final document width > this (production limit)
+      maxDocWMm:      580,         // alert triggers if final document width > this (production limit)
       flapMin:        90,          // alert if user enters flap width < this value (mm)
       hinge:          3,           // mm inboard from spine edge for hinge guide
       bleedNote:      'Add 3mm bleed allowance to the document',
@@ -186,7 +186,7 @@ const CONFIG = {
   boardThicknesses: [
     { label: 'Choose board size', value: 0   },
     { label: '1.5mm boards',      value: 3   },
-    { label: '1.9mm boards',      value: 3.8 },
+    { label: '1.75mm boards',     value: 3.5 },
     { label: '2mm boards',        value: 4   },
     { label: '2.25mm boards',     value: 4.5 },
     { label: '2.5mm boards',      value: 5   },
@@ -204,19 +204,20 @@ const CONFIG = {
   // Modify messages here to match your brand voice and contact procedures.
   // Alert triggers are defined in coverTypes above:
   //   - spine60/spine50: triggered when spine > maxSpineMm
-  //   - docW530: triggered when docW > maxDocWMm (flaps only)
+  //   - docW580: triggered when docW > maxDocWMm (flaps only)
   //   - flapMin/flapMax: triggered by flap width bounds (limp with flaps)
   //   - jktFlapMin/jktFlapMax: triggered by jacket flap bounds (jacket only)
   //   - boardReq: triggered when board thickness not selected (jacket/PPC)
   alerts: {
-    spine60:    '⚠ Spine exceeds 60mm maximum — contact your Account Manager.',
-    spine50:    '⚠ Spine exceeds 50mm maximum — contact your Account Manager.',
-    docW530:    '⚠ Document width exceeds 530mm — contact your Account Manager.',
+    spine60:    '⚠ Spine exceeds 60mm maximum — Contact Your Printer.',
+    spine50:    '⚠ Spine exceeds 50mm maximum — Contact Your Printer.',
+    docW580:    '⚠ Document width exceeds 580mm — Contact Your Printer.',
     flapMin:    '⚠ Flap width is below the minimum.',
     flapMax:    '⚠ Flap width exceeds maximum (page width − 10mm).',
     jktFlapMin: '⚠ Flap width is below the 70mm minimum.',
     jktFlapMax: '⚠ Flap width exceeds the 100mm maximum.',
     boardReq:   '⚠ Please select a board thickness.',
+    requiredFields: '⚠ Please complete all required fields.',
   },
 
   // ── PDF drawing constants ──────────────────────────────────────

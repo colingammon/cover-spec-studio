@@ -424,6 +424,8 @@ function cvSetMode(m) {
   show('sec-binding',        m==='jacket'||m==='ppc');
   show('sec-boardThickness', m==='jacket'||m==='ppc');
   show('sec-ppcType',        m==='ppc');
+  show('sec-ppcWrap',        m==='ppc');
+  if(m==='ppc') document.getElementById('ppcWrap').value='15';
   ['limp','flaps','jacket','ppc'].forEach(k=>{
     document.getElementById('results-'+k).style.display=k===m?'':'none';
   });
@@ -431,7 +433,7 @@ function cvSetMode(m) {
     limp:   'PDF page = trim size. Hinge & spine guides included.',
     flaps:  'PDF page = trim size incl. flaps. Score & spine guides included.',
     jacket: 'PDF page = trim size incl. flaps & turn-ins. Fold guides included.',
-    ppc:    'PDF page = full document size incl. 15mm wraparounds. Gutter & fold guides included.',
+    ppc:    'PDF page = full document size incl. wraparounds. Gutter & fold guides included.',
   };
   document.getElementById('footer-note').textContent=notes[m];
   cvCalculate();
@@ -439,8 +441,8 @@ function cvSetMode(m) {
 
 function cvShowAlert(id,show) { document.getElementById(id).classList.toggle('show',show); }
 function cvClearAlerts() {
-  ['alert-spine-60','alert-spine-50','alert-docw-530',
-   'alert-flap-min','alert-flap-max','alert-jktflap-min','alert-jktflap-max','alert-board-req']
+  ['alert-spine-60','alert-spine-50','alert-docw-580',
+   'alert-flap-min','alert-flap-max','alert-jktflap-min','alert-jktflap-max','alert-board-req','alert-required-fields']
   .forEach(id=>cvShowAlert(id,false));
 }
 
@@ -458,11 +460,25 @@ function cvCalculate() {
   const pH=cvVal('pHeight'),pW=cvVal('pWidth');
   const gsm=cvVal('gsm'),vol=cvVal('volume'),pages=cvVal('numPages');
   const hasCore=pW>0&&pH>0;
+
+  // Check for required fields (mode-specific only) — only if user has entered dimensions
+  if(hasCore) {
+    const flapWidth=cvVal('flapWidth');
+    const jacketFlapWidth=cvVal('jacketFlapWidth');
+
+    let requiredFieldsMissing=false;
+    if(cvMode==='flaps'&&flapWidth<=0) requiredFieldsMissing=true;
+    if(cvMode==='jacket'&&(jacketFlapWidth<=0)) requiredFieldsMissing=true;
+
+    if(requiredFieldsMissing) cvShowAlert('alert-required-fields',true);
+  }
+
   if      (cvMode==='limp')   cvCalcLimp(pH,pW,gsm,vol,pages,hasCore);
   else if (cvMode==='flaps')  cvCalcFlaps(pH,pW,gsm,vol,pages,hasCore);
   else if (cvMode==='jacket') cvCalcJacket(pH,pW,gsm,vol,pages,hasCore);
   else if (cvMode==='ppc')    cvCalcPPC(pH,pW,gsm,vol,pages,hasCore);
   document.getElementById('btn-download').disabled=!cvState;
+  document.getElementById('btn-specs').disabled=!cvState;
   document.getElementById('btn-save-calc').disabled=!cvState;
 }
 
@@ -495,7 +511,7 @@ function cvCalcFlaps(pH,pW,gsm,vol,pages,hasCore) {
   cvSetResult('r-flaps-docH',   hasCore?cvFmt(docH):null);
   const spEl=document.getElementById('r-flaps-spine');
   if(spine>50){cvShowAlert('alert-spine-50',true);spEl.style.color='var(--red)';}else spEl.style.color='';
-  if(docW>530) cvShowAlert('alert-docw-530',true);
+  if(docW>580) cvShowAlert('alert-docw-580',true);
   if(flapW>0&&flapW<90) cvShowAlert('alert-flap-min',true);
   if(flapW>0&&pW>0&&flapW>pW-10) cvShowAlert('alert-flap-max',true);
   document.getElementById('flap-hint').textContent=pW>0?`Min 90mm — max ${pW-10}mm`:'Min 90mm — max = page width − 10mm';
@@ -540,13 +556,13 @@ function cvCalcPPC(pH,pW,gsm,vol,pages,hasCore) {
   const bindAdder=parseFloat(document.getElementById('binding').value)||0;
   const boardVal=parseFloat(document.getElementById('boardThickness').value)||0;
   const gutter=CONFIG.coverTypes.ppc.subtypes[ppcType]?.gutter||8;
+  const wrap=parseFloat(document.getElementById('ppcWrap').value)||15;
   const coverW=hasCore?pW-gutter:0;
   const spine=cvCalcSpine(pages,gsm,vol,0.50,bindAdder+boardVal,true);
-  const WRAP=15;
   const trimW=hasCore?Math.round(coverW+gutter+spine+gutter+coverW):0;
   const trimH=hasCore?Math.round(pH+6):0;
-  const docW=hasCore?WRAP+coverW+gutter+spine+gutter+coverW+WRAP:0;
-  const docH=hasCore?pH+36:0;
+  const docW=hasCore?wrap+coverW+gutter+spine+gutter+coverW+wrap:0;
+  const docH=hasCore?pH+wrap+wrap+6:0;
   cvSetResult('r-ppc-spine', spine>0||hasCore?cvFmtInt(spine):null);
   cvSetResult('r-ppc-trimW', hasCore?cvFmtInt(trimW):null);
   cvSetResult('r-ppc-trimH', hasCore?cvFmtInt(trimH):null);
@@ -563,9 +579,9 @@ function cvCalcPPC(pH,pW,gsm,vol,pages,hasCore) {
     'Spine':cvFmtInt(spine)+' mm (rounded to mm)',
     'Board':boardVal>0?`${boardVal}mm (both boards combined)`:'Not selected',
     'Gutter':gutter+'mm each side — avoid type in this area',
-    'Wraparound':`${WRAP}mm all sides`,
+    'Wraparound':`${wrap}mm all sides (top, bottom, front & back)`,
   });
-  cvState=hasCore?{mode:'ppc',pH,pW,spine,coverW,gutter,trimW,trimH,docW,docH,WRAP:15,boardVal}:null;
+  cvState=hasCore?{mode:'ppc',pH,pW,spine,coverW,gutter,trimW,trimH,docW,docH,WRAP:wrap,boardVal}:null;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -712,7 +728,7 @@ function pdfPPC() {
   const {str,fill,ln,dash,txt,infoBlock}=cvHelpers(doc);
 
   const x1=WRAP, x2=x1+coverW, x3=x2+gutter, x4=x3+spine, x5=x4+gutter, x6=x5+coverW;
-  const trimTop=15, trimBot=pageH-15;
+  const trimTop=WRAP, trimBot=pageH-WRAP;
   const spineCx=x3+spine/2, midY=pageH/2;
 
   fill(232,231,227);doc.rect(0,0,pageW,pageH,'F');
@@ -731,8 +747,8 @@ function pdfPPC() {
   str(80,80,80,0.25);dash(spineCx,0,spineCx,pageH,3,2);
 
   // Wraparound labels (horizontal only — no vertical annotations)
-  txt(x1+trimW/2, trimTop/2+3,   '15mm wraparound',9,true,[80,80,80]);
-  txt(x1+trimW/2, trimBot+7,     '15mm wraparound',9,true,[80,80,80]);
+  txt(x1+trimW/2, trimTop/2+3,   `${WRAP}mm wraparound (all sides)`,9,true,[80,80,80]);
+  txt(x1+trimW/2, trimBot+7,     `${WRAP}mm wraparound (all sides)`,9,true,[80,80,80]);
 
   // Panel labels — no vertical FOLD annotations, no vertical side labels
   txt(x1+coverW/2, midY-5,'BACK COVER',  14,true,[220,0,0]);
@@ -756,12 +772,109 @@ function pdfPPC() {
   doc.save(`ppc-template-${cvFmt(pW,0)}x${cvFmt(pH,0)}-sp${cvFmtInt(spine)}.pdf`);
 }
 
+// ── DOWNLOAD SPECS TEXT FILE ──────────────────────────────────────
+function cvDownloadSpecs() {
+  if (!cvState) return;
+
+  const pH = cvVal('pHeight');
+  const pW = cvVal('pWidth');
+  const gsm = cvVal('gsm');
+  const vol = cvVal('volume');
+  const pages = cvVal('numPages');
+  const now = new Date();
+
+  // Build specs text
+  let specs = `COVERSPEC STUDIO — Production-Ready Cover Specifications\n`;
+  specs += `Generated: ${now.toLocaleString()}\n`;
+  specs += `\n${'='.repeat(60)}\n\n`;
+
+  specs += `COVER TYPE\n`;
+  specs += `${'-'.repeat(60)}\n`;
+  specs += `TYPE: ${cvMode.charAt(0).toUpperCase() + cvMode.slice(1)}\n\n`;
+
+  specs += `PAGE DIMENSIONS\n`;
+  specs += `${'-'.repeat(60)}\n`;
+  specs += `Trim Height: ${pH} mm\n`;
+  specs += `Trim Width: ${pW} mm\n\n`;
+
+  specs += `PAPER SPECIFICATION\n`;
+  specs += `${'-'.repeat(60)}\n`;
+  specs += `Grammage: ${gsm} gsm\n`;
+  specs += `Volume: ${vol}\n`;
+  specs += `Number of Pages: ${pages} pp\n\n`;
+
+  // Add mode-specific inputs
+  if (cvMode === 'flaps') {
+    const flapW = cvVal('flapWidth');
+    specs += `FLAP SPECIFICATION\n`;
+    specs += `${'-'.repeat(60)}\n`;
+    specs += `Flap Width: ${flapW} mm\n\n`;
+  } else if (cvMode === 'jacket') {
+    const flapW = cvVal('jacketFlapWidth');
+    const binding = document.getElementById('binding').value;
+    const boardSelect = document.getElementById('boardThickness');
+    const boardLabel = boardSelect.options[boardSelect.selectedIndex].text;
+    specs += `JACKET SPECIFICATION\n`;
+    specs += `${'-'.repeat(60)}\n`;
+    specs += `Flap Width: ${flapW} mm\n`;
+    specs += `Binding: ${binding === '0' ? 'Perfect Bound' : 'Sewn'}\n`;
+    specs += `Board Thickness: ${boardLabel}\n\n`;
+  } else if (cvMode === 'ppc') {
+    const binding = document.getElementById('binding').value;
+    const boardSelect = document.getElementById('boardThickness');
+    const boardLabel = boardSelect.options[boardSelect.selectedIndex].text;
+    const ppcType = document.getElementById('ppcType').value;
+    const wrap = cvVal('ppcWrap') || 15;
+    specs += `PPC SPECIFICATION\n`;
+    specs += `${'-'.repeat(60)}\n`;
+    specs += `PPC Type: ${ppcType.charAt(0).toUpperCase() + ppcType.slice(1)}\n`;
+    specs += `Binding: ${binding === '0' ? 'Perfect Bound' : 'Sewn'}\n`;
+    specs += `Board Thickness: ${boardLabel}\n`;
+    specs += `Wraparound Size: ${wrap}mm (all sides — top, bottom, front & back)\n\n`;
+  }
+
+  specs += `CALCULATED RESULTS\n`;
+  specs += `${'-'.repeat(60)}\n`;
+  specs += `Spine Width: ${cvState.spine} mm\n`;
+  specs += `Document Width: ${cvFmtInt(cvState.docW)} mm\n`;
+  specs += `Document Height: ${cvFmtInt(cvState.docH)} mm\n\n`;
+
+  specs += `PRODUCTION NOTES\n`;
+  specs += `${'-'.repeat(60)}\n`;
+  specs += `${CONFIG.coverTypes[cvMode].bleedNote}\n`;
+  specs += `${CONFIG.coverTypes[cvMode].pdfNote}\n\n`;
+
+  specs += `ALERTS & WARNINGS\n`;
+  specs += `${'-'.repeat(60)}\n`;
+  const alerts = document.querySelectorAll('.alert-box.show');
+  if (alerts.length === 0) {
+    specs += `No alerts — specifications within acceptable ranges.\n`;
+  } else {
+    alerts.forEach(alert => {
+      specs += `⚠ ${alert.textContent.trim()}\n`;
+    });
+  }
+
+  // Download as TXT file
+  const filename = `specs-${cvMode}-${pH}x${pW}-sp${cvFmtInt(cvState.spine)}.txt`;
+  const blob = new Blob([specs], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 // ── RESET ─────────────────────────────────────────────────────────
 function cvReset() {
   [...CORE_IDS,'flapWidth','jacketFlapWidth'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('binding').value='0';
   document.getElementById('boardThickness').value='0';
   document.getElementById('ppcType').value='round';
+  document.getElementById('ppcWrap').value='15';
   cvState=null;
   cvClearAlerts();
   cvCalculate();

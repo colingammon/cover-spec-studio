@@ -610,7 +610,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div class="field-row single">
       <div class="field-group">
         <label>Flap Width</label>
-        <div class="input-wrap"><input type="number" id="flapWidth" placeholder="0" min="0"><span class="input-unit">mm</span></div>
+        <div class="input-wrap"><input type="number" id="flapWidth" placeholder="(required)" min="0"><span class="input-unit">mm</span></div>
         <div class="field-hint" id="flap-hint">Min 90mm — max = page width − 10mm</div>
       </div>
     </div>
@@ -621,7 +621,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div class="field-row single">
       <div class="field-group">
         <label>Flap Width</label>
-        <div class="input-wrap"><input type="number" id="jacketFlapWidth" placeholder="0" min="0"><span class="input-unit">mm</span></div>
+        <div class="input-wrap"><input type="number" id="jacketFlapWidth" placeholder="(required)" min="0"><span class="input-unit">mm</span></div>
         <div class="field-hint">Min 70mm — max 100mm</div>
       </div>
     </div>
@@ -671,6 +671,17 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     </div>
   </div>
 
+  <div class="section cond" id="sec-ppcWrap">
+    <div class="section-title">Wraparound</div>
+    <div class="field-row single">
+      <div class="field-group">
+        <label>Wraparound Size</label>
+        <div class="input-wrap"><input type="number" id="ppcWrap" placeholder="15" value="15" min="0" oninput="cvCalculate()"><span class="input-unit">mm</span></div>
+        <div class="field-hint">Board wraparound at top and bottom (typically 15mm)</div>
+      </div>
+    </div>
+  </div>
+
   <div class="section">
     <div class="section-title">Calculated Results</div>
 
@@ -712,12 +723,13 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 
     <div class="alert-box" id="alert-spine-60">⚠ Spine exceeds 60mm maximum — contact your Account Manager.</div>
     <div class="alert-box" id="alert-spine-50">⚠ Spine exceeds 50mm maximum — contact your Account Manager.</div>
-    <div class="alert-box" id="alert-docw-530">⚠ Document width exceeds 530mm — contact your Account Manager to discuss the estimate.</div>
+    <div class="alert-box" id="alert-docw-580">⚠ Document width exceeds 580mm — Contact Your Printer.</div>
     <div class="alert-box" id="alert-flap-min">⚠ Flap width is below the 90mm minimum.</div>
     <div class="alert-box" id="alert-flap-max">⚠ Flap width exceeds maximum (page width − 10mm).</div>
     <div class="alert-box" id="alert-jktflap-min">⚠ Flap width is below the 70mm minimum.</div>
     <div class="alert-box" id="alert-jktflap-max">⚠ Flap width exceeds the 100mm maximum.</div>
     <div class="alert-box" id="alert-board-req">⚠ Please select a board thickness to calculate the spine accurately.</div>
+    <div class="alert-box" id="alert-required-fields">⚠ Please complete all required fields.</div>
   </div>
 
   <div class="section">
@@ -746,6 +758,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 <div class="card-footer">
   <button class="btn-download" id="btn-download" disabled onclick="cvGeneratePDF()">Download PDF Template</button>
   <div class="btn-row">
+    <button class="btn-secondary" id="btn-specs" disabled onclick="cvDownloadSpecs()">Download Specs (TXT)</button>
     <button class="btn-secondary" id="btn-save-calc" disabled onclick="cvSaveCalculation()">Save Calculation</button>
     <button class="btn-secondary" onclick="cvReset()">Reset</button>
   </div>

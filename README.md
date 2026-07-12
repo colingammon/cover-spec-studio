@@ -74,11 +74,17 @@ All three tools run entirely in the browser with no server backend. The applicat
 4. Enter paper grammage (gsm) and volume (or use preset)
 5. Enter total extent (number of pages)
 6. For flap covers, specify flap width; for jackets/PPC, select board thickness
-7. Results update in real-time
-8. Click **Download PDF Template** to save a to-scale PDF with red text guides
-9. **Optionally click Save Calculation** to store this spec with a custom name for future use
+7. For PPC, optionally customize the wraparound size (default 15mm, applies to all sides)
+8. Results update in real-time
+9. Click **Download PDF Template** to save a to-scale PDF with red text guides
+10. Click **Download Specs (TXT)** to save calculated specifications as a text file
+11. **Optionally click Save Calculation** to store this spec with a custom name for future use
 
 The generated PDF is trim size (no bleed padding) with spine boundaries, fold guides, and all text in red for visibility.
+
+**Downloads:**
+- **PDF Template:** Vector-based template ready for InDesign, Affinity Publisher, or Illustrator
+- **TXT Specs:** Text file with all calculated dimensions and cover specifications for reference
 
 ### Micron to Volume
 
@@ -141,7 +147,9 @@ jacket: {
 
 ```javascript
 alerts: {
-  spine60: '⚠ Spine too large — contact your Account Manager.',
+  spine60: '⚠ Spine exceeds 60mm maximum — Contact Your Printer.',
+  spine50: '⚠ Spine exceeds 50mm maximum — Contact Your Printer.',
+  docW580: '⚠ Document width exceeds 580mm — Contact Your Printer.',
   // ... other messages
 }
 ```
@@ -166,6 +174,19 @@ ppc: {
   }
 }
 ```
+
+### Customize PPC Wraparound
+
+The PPC calculator allows users to set custom wraparound sizes (board overhang on all four sides). The input field defaults to 15mm and resets each time the PPC tab is selected. To modify the default:
+
+```javascript
+ppc: {
+  wrap: 20,  // Change default wraparound from 15mm to 20mm
+  // Users can still override this value in the form
+}
+```
+
+The wraparound value applies to all four sides: top, bottom, front, and back.
 
 ### White-Label
 
