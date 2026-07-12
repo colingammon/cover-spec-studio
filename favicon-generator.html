@@ -54,45 +54,49 @@
   function drawIcon(ctx, size) {
     ctx.clearRect(0, 0, size, size);
 
-    // Background
-    ctx.fillStyle = '#ffffff';
+    // Scale factor to convert from 32x32 viewBox to target size
+    const scale = size / 32;
+
+    // Background (gold)
+    ctx.fillStyle = '#a58242';
     ctx.fillRect(0, 0, size, size);
 
-    // Scale factor to convert from 24x24 viewBox to target size
-    const scale = size / 24;
-    const lw = Math.max(1.2, 2 * scale);
+    // Helper function to draw rounded rectangle
+    function drawRoundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
 
-    ctx.strokeStyle = '#a58242';
-    ctx.lineWidth = lw;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    // Back cover shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    drawRoundRect(3 * scale, 5 * scale, 7 * scale, 20 * scale, 1 * scale);
+    ctx.fill();
 
-    // Draw rounded rectangle (cover border)
-    const x = 2 * scale, y = 3 * scale, w = 20 * scale, h = 18 * scale, r = 2 * scale;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-    ctx.stroke();
+    // Spine (filled - black)
+    ctx.fillStyle = '#000000';
+    drawRoundRect(10 * scale, 5 * scale, 4 * scale, 20 * scale, 1 * scale);
+    ctx.fill();
 
-    // Left vertical line (left spine boundary)
-    ctx.beginPath();
-    ctx.moveTo(9 * scale, 3 * scale);
-    ctx.lineTo(9 * scale, 21 * scale);
-    ctx.stroke();
+    // Front cover (filled - black)
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.85;
+    drawRoundRect(14 * scale, 5 * scale, 15 * scale, 20 * scale, 1 * scale);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
 
-    // Right vertical line (right spine boundary)
-    ctx.beginPath();
-    ctx.moveTo(15 * scale, 3 * scale);
-    ctx.lineTo(15 * scale, 21 * scale);
-    ctx.stroke();
+    // Cover highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    drawRoundRect(16 * scale, 8 * scale, 11 * scale, 4 * scale, 0.5 * scale);
+    ctx.fill();
   }
 
   function generateAndDrawIcon(canvasId, size) {
