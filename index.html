@@ -447,6 +447,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 <!-- APP TABS -->
 <div class="app-tabs">
   <button class="app-tab active" onclick="showTab('intro')">Introduction</button>
+  <button class="app-tab" onclick="showTab('sizes')">Standard Sizes</button>
   <button class="app-tab" onclick="showTab('covers')">Cover Templates</button>
   <button class="app-tab" onclick="showTab('micron')">Micron → Volume</button>
   <button class="app-tab" onclick="showTab('barcode')">ISBN Barcode</button>
@@ -539,7 +540,89 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 </div>
 
 <!-- ══════════════════════════════════════════════
-     TAB 1: COVER TEMPLATES
+     TAB 1: STANDARD SIZES
+══════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-sizes">
+<div class="card" style="max-width:800px">
+<div class="card-body">
+  <div class="section" style="border-bottom:none">
+    <div class="section-title">Standard Book Sizes</div>
+    <p style="font-size:14px;line-height:1.7;color:var(--text-mid);margin-bottom:20px">
+      Common trim sizes used in book production. All dimensions are listed as Height × Width in millimetres.
+    </p>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <thead>
+        <tr style="background:var(--accent);color:#000">
+          <th style="padding:10px 12px;text-align:left;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase">Format</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase">Height × Width (mm)</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase">Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">A-Format</td>
+          <td style="padding:10px 12px;font-size:13px">178 × 111 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Mass-market fiction paperbacks</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">B-Format</td>
+          <td style="padding:10px 12px;font-size:13px">198 × 129 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Most common UK fiction &amp; non-fiction</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">Pinched Crown</td>
+          <td style="padding:10px 12px;font-size:13px">186 × 120 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Compact fiction or poetry editions</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">Demy (Limp)</td>
+          <td style="padding:10px 12px;font-size:13px">216 × 135 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Premium trade paperbacks, literary fiction</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">Demy (Case Bound)</td>
+          <td style="padding:10px 12px;font-size:13px">216 × 138 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Standard hardback fiction &amp; non-fiction</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">American Royal</td>
+          <td style="padding:10px 12px;font-size:13px">229 × 152 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">US Trade (6×9"), print-on-demand standard</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">Royal (Limp)</td>
+          <td style="padding:10px 12px;font-size:13px">234 × 153 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Premium paperbacks, biographies, travel</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">Royal (Case Bound)</td>
+          <td style="padding:10px 12px;font-size:13px">234 × 156 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Commercial hardbacks &amp; heavy non-fiction</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">A5</td>
+          <td style="padding:10px 12px;font-size:13px">210 × 148 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Academic publishing, journals, manuals</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-size:13px;font-weight:600">A4</td>
+          <td style="padding:10px 12px;font-size:13px">297 × 210 mm</td>
+          <td style="padding:10px 12px;font-size:13px;color:var(--text-dim)">Illustrated art books, atlases, children's</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r-xs);padding:14px 16px;font-size:13px;color:var(--text-mid);line-height:1.6">
+      <strong style="color:var(--text)">Note:</strong> Based on UK and European standard book sizes. For case bound (hardback) books, outer boards typically extend 3–4mm beyond the page block. All dimensions are Height × Width in millimetres.
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TAB 2: COVER TEMPLATES
 ══════════════════════════════════════════════ -->
 <div class="tab-panel" id="tab-covers">
 <div class="card">
@@ -721,9 +804,8 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
       </div>
     </div>
 
-    <div class="alert-box" id="alert-spine-60">⚠ Spine exceeds 60mm maximum — Contact Your Printer.</div>
-    <div class="alert-box" id="alert-spine-50">⚠ Spine exceeds 50mm maximum — Contact Your Printer.</div>
-    <div class="alert-box" id="alert-docw-580">⚠ Document width exceeds 580mm — Contact Your Printer.</div>
+    <div class="alert-box" id="alert-spine-60">⚠ Spine may exceed binding machine limits (Min 2mm – Max 65mm recommended) — Contact your Printer or consider using a lower grammage paper.</div>
+    <div class="alert-box" id="alert-spine-50">⚠ Spine may exceed binding machine limits (Min 2mm – Max 65mm recommended) — Contact Your Printer or consider using a lower grammage paper.</div>
     <div class="alert-box" id="alert-flap-min">⚠ Flap width is below the 90mm minimum.</div>
     <div class="alert-box" id="alert-flap-max">⚠ Flap width exceeds maximum (page width − 10mm).</div>
     <div class="alert-box" id="alert-jktflap-min">⚠ Flap width is below the 70mm minimum.</div>
@@ -954,7 +1036,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
   root.setProperty('--r-sm',            t.rSm);
 })();
 
-const TAB_ORDER = ['intro','covers','micron','barcode'];
+const TAB_ORDER = ['intro','sizes','covers','micron','barcode'];
 // Prevent up/down arrow keys from incrementing/decrementing number inputs
 document.addEventListener('keydown', function(e) {
   if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.type === 'number') {

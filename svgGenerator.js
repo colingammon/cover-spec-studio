@@ -90,8 +90,8 @@ text { font-family: Arial, Helvetica, sans-serif; }
   svg += `
 <!-- Notes section -->
 <g id="notes">
-  <text x="${pageW / 2}" y="${pageH * 0.08}" text-anchor="middle" class="label-notes">A 3mm hinge will be created as part of the manufacturing process</text>
-  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">Avoid type matter running into this area</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">A 3mm hinge will be created as part of the manufacturing process</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 20}" text-anchor="middle" class="label-notes">Avoid type matter running into this area</text>
 </g>
 
 <!-- Info section -->
@@ -181,8 +181,8 @@ ${spine >= 10 ? `<g id="spine-section">
 </g>`}
 
 <g id="notes">
-  <text x="${pageW / 2}" y="${pageH * 0.08}" text-anchor="middle" class="label-notes">A 3mm hinge will be created as part of the manufacturing process</text>
-  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">Ensure artwork extends to fold lines</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">A 3mm hinge will be created as part of the manufacturing process</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 20}" text-anchor="middle" class="label-notes">Ensure artwork extends to fold lines</text>
 </g>
 
 <g id="info">
@@ -273,8 +273,8 @@ ${spine >= 10 ? `<g id="spine-section">
 </g>`}
 
 <g id="notes">
-  <text x="${pageW / 2}" y="${pageH * 0.08}" text-anchor="middle" class="label-notes">Ensure artwork extends into the 10mm turn-in allowance</text>
-  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">Extend fore-edge bleeds into the turn-in area</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">Ensure artwork extends into the 10mm turn-in allowance</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 20}" text-anchor="middle" class="label-notes">Extend fore-edge bleeds into the turn-in area</text>
 </g>
 
 <g id="info">
@@ -367,8 +367,8 @@ ${spine >= 10 ? `<g id="spine-section">
 </g>
 
 <g id="notes">
-  <text x="${pageW / 2}" y="${pageH * 0.08}" text-anchor="middle" class="label-notes">Avoid type matter going into the gutter allowance</text>
-  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">Ensure artwork extends into the wraparound</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 10}" text-anchor="middle" class="label-notes">Avoid type matter going into the gutter allowance</text>
+  <text x="${pageW / 2}" y="${pageH * 0.08 + 20}" text-anchor="middle" class="label-notes">Ensure artwork extends into the wraparound</text>
 </g>
 
 <g id="info">

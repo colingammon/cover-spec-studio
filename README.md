@@ -8,6 +8,11 @@ Production-ready cover specifications made instant. A free, browser-based toolki
 
 ## Features
 
+**Standard Sizes Reference**
+- UK and European standard book trim sizes (A-Format through A4)
+- Includes binding types and common use cases
+- Quick reference for industry-standard dimensions
+
 **Cover Templates**
 - Calculate exact dimensions for four binding types: limp cover, limp with flaps, dust jacket, and printed paper case (PPC)
 - Automatically compute spine width from paper specifications (gsm, volume, extent)
@@ -32,7 +37,7 @@ Production-ready cover specifications made instant. A free, browser-based toolki
 
 ## How It Works
 
-All three tools run entirely in the browser with no server backend. The application:
+All four tools run entirely in the browser with no server backend. The application:
 - Uses [jsPDF 2.5.1](https://github.com/parallax/jsPDF) for vector PDF generation
 - Performs all calculations client-side
 - Saves generated PDFs directly to your computer
@@ -151,9 +156,8 @@ jacket: {
 
 ```javascript
 alerts: {
-  spine60: '⚠ Spine exceeds 60mm maximum — Contact Your Printer.',
-  spine50: '⚠ Spine exceeds 50mm maximum — Contact Your Printer.',
-  docW580: '⚠ Document width exceeds 580mm — Contact Your Printer.',
+  spine60: '⚠ Spine may exceed binding machine limits (Min 2mm – Max 65mm recommended) — Contact Your Printer or consider using a lower grammage paper.',
+  spine50: '⚠ Spine may exceed binding machine limits (Min 2mm – Max 65mm recommended) — Contact Your Printer or consider using a lower grammage paper.',
   // ... other messages
 }
 ```

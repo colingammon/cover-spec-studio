@@ -138,7 +138,6 @@ const CONFIG = {
       spineBaseline:  0.65,        // baseline mm added to spine calculation
       spineRoundMm:   false,       // round to 1 decimal place
       maxSpineMm:     50,          // alert triggers if calculated spine > this (stricter than limp)
-      maxDocWMm:      580,         // alert triggers if final document width > this (production limit)
       flapMin:        90,          // alert if user enters flap width < this value (mm)
       hinge:          3,           // mm inboard from spine edge for hinge guide
       bleedNote:      'Add 3mm bleed allowance to the document',
@@ -204,14 +203,12 @@ const CONFIG = {
   // Modify messages here to match your brand voice and contact procedures.
   // Alert triggers are defined in coverTypes above:
   //   - spine60/spine50: triggered when spine > maxSpineMm
-  //   - docW580: triggered when docW > maxDocWMm (flaps only)
   //   - flapMin/flapMax: triggered by flap width bounds (limp with flaps)
   //   - jktFlapMin/jktFlapMax: triggered by jacket flap bounds (jacket only)
   //   - boardReq: triggered when board thickness not selected (jacket/PPC)
   alerts: {
-    spine60:    '⚠ Spine exceeds 60mm maximum — Contact Your Printer.',
-    spine50:    '⚠ Spine exceeds 50mm maximum — Contact Your Printer.',
-    docW580:    '⚠ Document width exceeds 580mm — Contact Your Printer.',
+    spine60:    '⚠ Spine may exceed binding machine limits (Min 2mm – Max 65mm recommended) — Contact your Printer or consider using a lower grammage paper.',
+    spine50:    '⚠ Spine may exceed binding machine limits (Min 2mm – Max 65mm recommended) — Contact your Printer or consider using a lower grammage paper.',
     flapMin:    '⚠ Flap width is below the minimum.',
     flapMax:    '⚠ Flap width exceeds maximum (page width − 10mm).',
     jktFlapMin: '⚠ Flap width is below the 70mm minimum.',

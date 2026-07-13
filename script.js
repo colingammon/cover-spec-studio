@@ -530,7 +530,7 @@ function cvSetMode(m) {
 
 function cvShowAlert(id,show) { document.getElementById(id).classList.toggle('show',show); }
 function cvClearAlerts() {
-  ['alert-spine-60','alert-spine-50','alert-docw-580',
+  ['alert-spine-60','alert-spine-50',
    'alert-flap-min','alert-flap-max','alert-jktflap-min','alert-jktflap-max','alert-board-req','alert-required-fields']
   .forEach(id=>cvShowAlert(id,false));
 }
@@ -601,7 +601,6 @@ function cvCalcFlaps(pH,pW,gsm,vol,pages,hasCore) {
   cvSetResult('r-flaps-docH',   hasCore?cvFmt(docH):null);
   const spEl=document.getElementById('r-flaps-spine');
   if(spine>50){cvShowAlert('alert-spine-50',true);spEl.style.color='var(--red)';}else spEl.style.color='';
-  if(docW>580) cvShowAlert('alert-docw-580',true);
   if(flapW>0&&flapW<90) cvShowAlert('alert-flap-min',true);
   if(flapW>0&&pW>0&&flapW>pW-10) cvShowAlert('alert-flap-max',true);
   document.getElementById('flap-hint').textContent=pW>0?`Min 90mm — max ${pW-10}mm`:'Min 90mm — max = page width − 10mm';
@@ -1134,3 +1133,4 @@ function cvClearAllSaved() {
     cvUpdateSavedUI();
   }
 }
+

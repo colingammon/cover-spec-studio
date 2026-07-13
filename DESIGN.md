@@ -1,8 +1,8 @@
-# DESIGN.md — Cover Layout Creator
+# DESIGN.md — CoverSpec Studio
 
 ## Product
 
-- **Product name:** Cover Layout Creator
+- **Product name:** CoverSpec Studio
 - **Audience:** Book designers, pre-press operators, and production staff preparing artwork files for book cover production. Users range from highly experienced DTP professionals to less experienced staff who need simple, unambiguous guidance.
 - **Product surface:** Browser-based toolset
 
