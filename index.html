@@ -71,7 +71,6 @@ header {
   height: 60px;
   flex-shrink: 0;
   gap: 16px;
-  border-image: linear-gradient(to right, transparent calc((100% - 600px) / 2), var(--chrome-bord) calc((100% - 600px) / 2), var(--chrome-bord) calc((100% + 600px) / 2), transparent calc((100% + 600px) / 2)) 0 0 1 0;
 }
 .header-sep  { width:1px; height:24px; background:var(--chrome-bord); }
 .header-title {
@@ -89,7 +88,6 @@ header {
   background: var(--chrome-surf);
   padding: 0 28px;
   flex-shrink: 0;
-  border-image: linear-gradient(to right, transparent calc((100% - 600px) / 2), var(--chrome-bord) calc((100% - 600px) / 2), var(--chrome-bord) calc((100% + 600px) / 2), transparent calc((100% + 600px) / 2)) 0 0 1 0;
 }
 .app-tab {
   padding: 13px 18px;
@@ -218,6 +216,15 @@ header {
 }
 .input-wrap input[type="number"]::-webkit-inner-spin-button,
 .input-wrap input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+#bcFontScale {
+  padding-right: 12px !important;
+}
+#bcFontScale::-webkit-outer-spin-button,
+#bcFontScale::-webkit-inner-spin-button {
+  -webkit-appearance: auto !important;
+  display: auto !important;
+  margin-right: 8px !important;
+}
 .input-wrap input:focus          { border-color: var(--accent); background: #fff; }
 .input-wrap input:focus-visible  { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -532,8 +539,8 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
           <div style="font-family:var(--font);font-size:11px;font-weight:500;color:var(--text-dim);margin-top:2px">Generate a print-ready EAN-13 barcode PDF</div>
         </div>
       </a>
-      <p style="font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:10px">Generates a print-quality EAN-13 ISBN barcode as a vector PDF sized to your exact requirements. The barcode is drawn as native vector shapes — not a bitmap image — so it will print cleanly at any size without pixelation. An optional EAN-5 five-digit price supplement can be added alongside the main barcode.</p>
-      <p style="font-size:13px;line-height:1.75;color:var(--text-mid)"><strong>How to use:</strong> Enter your ISBN-13 number (hyphens are stripped automatically). Optionally enter a 5-digit add-on supplement. Set your preferred width and height in millimetres. A preview updates as you type. Click <em>Download PDF Barcode</em> and place the PDF into your cover artwork.</p>
+      <p style="font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:10px">Generates a print-quality EAN-13 ISBN barcode as a vector PDF sized to your exact requirements. The barcode is drawn as native vector shapes — not a bitmap image — so it will print cleanly at any size without pixelation. An optional EAN-5 five-digit add-on (price or edition number) can be added alongside the main barcode.</p>
+      <p style="font-size:13px;line-height:1.75;color:var(--text-mid)"><strong>How to use:</strong> Enter your ISBN-13 number (hyphens are stripped automatically). Optionally enter a 5-digit add-on (price supplement or edition number). Set your preferred width and height in millimetres. A preview updates as you type. Click <em>Download PDF Barcode</em> and place the PDF into your cover artwork.</p>
     </div>
 
   </div>
@@ -931,7 +938,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
           <input type="text" id="bcAddon" placeholder="00000" maxlength="5" oninput="bcUpdatePreview()"
             style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-xs);color:var(--text);font-family:var(--font);font-size:16px;font-weight:600;padding:10px 12px;outline:none;transition:border-color 300ms">
         </div>
-        <div class="field-hint">5 digits (e.g. price supplement). Leave blank if not required.</div>
+        <div class="field-hint">5 digits (price or edition number). Leave blank if not required.</div>
       </div>
     </div>
   </div>
@@ -973,7 +980,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
     <div class="field-row">
       <div class="field-group">
         <label>Font Size</label>
-        <div class="input-wrap"><input type="number" id="bcFontScale" value="100" min="50" max="150" step="10" oninput="bcUpdatePreview()"><span class="input-unit">%</span></div>
+        <div class="input-wrap"><input type="number" id="bcFontScale" value="100" min="50" max="150" step="5" oninput="bcUpdatePreview()" style="-webkit-appearance:auto;appearance:auto"><span class="input-unit">%</span></div>
       </div>
       <div class="field-group">
         <label>ISBN Format</label>
@@ -992,6 +999,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 
   <div class="section" id="bc-preview-wrap" style="display:none">
     <div class="section-title">Preview</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:12px;text-align:center">Screen preview at 96 DPI — text will appear larger in the PDF output</p>
     <div style="display:flex;flex-direction:column;align-items:center;gap:0">
       <div class="bc-canvas-wrap"><canvas id="bc-canvas"></canvas></div>
       <div class="bc-size-label" id="bc-size-label"></div>
@@ -1079,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', cvInit);
 </div>
 
 <!-- ── FOOTER & DISCLAIMER ── -->
-<footer style="background:var(--bg);border-top:1px solid var(--border);border-image:linear-gradient(to right, transparent calc((100% - 600px) / 2), var(--border) calc((100% - 600px) / 2), var(--border) calc((100% + 600px) / 2), transparent calc((100% + 600px) / 2)) 1 0 0 0;padding:28px 20px;margin-top:auto;text-align:center">
+<footer style="background:var(--bg);border-top:1px solid var(--border);padding:28px 20px;margin-top:auto;text-align:center">
   <div style="max-width:800px;margin:0 auto;font-size:12px;color:var(--text-dim);line-height:1.6">
     <p style="margin:0"><strong>Disclaimer:</strong> CoverSpec Studio provides calculated cover specifications as a reference tool. All calculations should be verified with your printer before production. Dimensions are provided in good faith but are not guaranteed to be error-free. Always confirm your book size, spine measurements, and production settings directly with your printing partner.</p>
   </div>

@@ -31,7 +31,7 @@ Production-ready cover specifications made instant. A free, browser-based toolki
 
 **ISBN Barcode Generator**
 - Create print-ready EAN-13 ISBN barcodes as vector PDFs
-- Optional EAN-5 price supplement add-on
+- Optional EAN-5 add-on (price or edition number)
 - Specify exact output width and height in millimetres
 - Live canvas preview
 
@@ -105,7 +105,7 @@ The generated templates are trim size (no bleed padding) with spine boundaries, 
 ### ISBN Barcode
 
 1. Enter 13-digit ISBN (hyphens ignored; must start 978 or 979)
-2. Optionally add a 5-digit EAN-5 price supplement
+2. Optionally add a 5-digit EAN-5 add-on (price or edition number)
 3. Set desired width and height in mm
 4. Live preview updates as you type
 5. Click **Download PDF Barcode** to save the barcode
