@@ -190,6 +190,7 @@ const CONFIG = {
     { label: '2.25mm boards',     value: 4.5 },
     { label: '2.5mm boards',      value: 5   },
     { label: '2.75mm boards',     value: 5.5 },
+    { label: '3mm boards',        value: 6 }
   ],
 
   // ── Binding adders ─────────────────────────────────────────────
