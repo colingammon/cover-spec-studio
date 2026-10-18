@@ -38,3 +38,7 @@ An Affinity by Canva script (`FitDocumentToGraphic_Affinity.js`) that resizes th
 - **Bleed couldn't be read back.** The script sets the bleed through the document properties and the change is recorded in the undo history, but the SDK's page-box readouts don't report bleed values. Check **Document > Document Setup** to see the bleed that was applied.
 - **Artwork is not extended into the bleed.** The graphic isn't scaled or stretched, so if it has no built-in bleed, the bleed area will be empty.
 - **Undo:** each step is a separate command, so undoing may take several presses of **Edit > Undo**.
+
+## Disclaimer
+
+These scripts are provided free of charge, as is, with no warranty of any kind. They change the size and layout of your document, so run them on a copy first and check the result (page size, bleed, trim guide and any non-printing settings) before sending files to print. CoverSpec Studio accepts no responsibility for errors, lost work or printing problems arising from their use. Confirm final dimensions with your printer.

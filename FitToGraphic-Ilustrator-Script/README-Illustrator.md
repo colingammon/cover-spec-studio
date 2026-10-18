@@ -61,3 +61,7 @@ If you need a true document bleed, untick **Add bleed** in the script and enter 
 ## Related
 
 The InDesign version of this tool is `FitDocumentToGraphic.jsx`, documented in `README.md`.
+
+## Disclaimer
+
+These scripts are provided free of charge, as is, with no warranty of any kind. They change the size and layout of your document, so run them on a copy first and check the result (page size, bleed, trim guide and any non-printing settings) before sending files to print. CoverSpec Studio accepts no responsibility for errors, lost work or printing problems arising from their use. Confirm final dimensions with your printer.

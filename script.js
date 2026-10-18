@@ -703,9 +703,9 @@ function pdfLimp() {
   str(80,80,80,0.3);dash(bx-HINGE,0,bx-HINGE,pageH,2,1.5);dash(sx+HINGE,0,sx+HINGE,pageH,2,1.5);
 
   txt(midBx,midY-5,'BACK COVER',14,true,[220,0,0]);
-  txt(midBx,midY+5,`${cvFmt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
+  txt(midBx,midY+5,`${cvFmtInt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
   txt(midFx,midY-5,'FRONT COVER',14,true,[220,0,0]);
-  txt(midFx,midY+5,`${cvFmt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
+  txt(midFx,midY+5,`${cvFmtInt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
   if(spine>=10){txt(spineCx,midY-4,'SPINE',11,true,[200,0,0]);txt(spineCx,midY+5,`${cvFmt(spine)} mm`,9,false,[240,80,80]);}
   else if(spine>=4){txt(spineCx,midY,`${cvFmt(spine)}mm`,8,true,[40,40,40],'center',90);}
 
@@ -746,9 +746,9 @@ function pdfFlaps() {
   // Panel labels — no FOLD annotations
   txt(flapW/2,     midY,'BACK FLAP',  11,true,[80,80,80]);
   txt(x1+coverW/2, midY-5,'BACK COVER',14,true,[220,0,0]);
-  txt(x1+coverW/2, midY+5,`${cvFmt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
+  txt(x1+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
   txt(x3+coverW/2, midY-5,'FRONT COVER',14,true,[220,0,0]);
-  txt(x3+coverW/2, midY+5,`${cvFmt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
+  txt(x3+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
   txt(x4+flapW/2,  midY,'FRONT FLAP', 11,true,[80,80,80]);
   if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmt(spine)} mm`,8,false,[240,80,80]);}
   else if(spine>=4){txt(spineCx,midY,`${cvFmt(spine)}mm`,7,true,[40,40,40],'center',90);}
