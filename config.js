@@ -130,6 +130,7 @@ const CONFIG = {
       maxSpineMm:     60,          // alert triggers if calculated spine > this value
       hinge:          3,           // mm inboard from spine edge for hinge guide
       bleedNote:      'Add 3mm bleed allowance to the document',
+      safeZone:       3,           // no type/border within this many mm of the edges
       pdfNote:        'PDF page = trim size. Hinge & spine guides included.',
       templateTitle:  'Cover Layout — Limp Cover Template',
     },
@@ -141,6 +142,7 @@ const CONFIG = {
       flapMin:        90,          // alert if user enters flap width < this value (mm)
       hinge:          3,           // mm inboard from spine edge for hinge guide
       bleedNote:      'Add 3mm bleed allowance to the document',
+      safeZone:       3,           // no type/border within this many mm of the edges
       pdfNote:        'PDF page = trim size incl. flaps. Score & spine guides included.',
       templateTitle:  'Cover Layout — Limp with Flaps (8pp) Template',
     },
@@ -155,6 +157,7 @@ const CONFIG = {
       flapMax:        100,         // alert if user enters flap width > this value (mm)
       heightAdd:      6,           // mm added to document height for board overhang (docH = pH + 6)
       bleedNote:      'Add 3mm bleed allowance to the document',
+      safeZone:       3,           // no type/border within this many mm of the edges
       pdfNote:        'PDF page = trim size incl. flaps & turn-ins. Fold guides included.',
       templateTitle:  'Cover Layout — Dust Jacket Template',
     },
@@ -166,6 +169,8 @@ const CONFIG = {
       wrap:           15,          // mm board wraparound top and bottom (docH = pH + 36 = pH + 15 + 15 + 6)
       heightAdd:      36,          // total mm added to height for wraparounds (15 top + 15 bottom + 6 overhang)
       bleedNote:      'No additional bleed required — wraparound acts as bleed',
+      safeEdge:       4,           // no text/image within this many mm of the case edge
+      safeSpine:      2,           // no text/image within this many mm of the spine edges
       pdfNote:        'PDF page = full document size incl. 15mm wraparounds.',
       templateTitle:  'Cover Layout — PPC Template',
       // PPC subtypes control gutter width (space between spine and cover edge)
@@ -220,18 +225,19 @@ const CONFIG = {
 
   // ── PDF drawing constants ──────────────────────────────────────
   pdf: {
-    fills: {
-      back:       [232, 231, 227],
-      spine:      [212, 210, 204],
-      front:      [238, 237, 233],
-      flap:       [225, 224, 220],
-      turnIn:     [230, 228, 222],
-      ppcBase:    [232, 231, 227],
-      ppcBack:    [238, 237, 234],
-      ppcFront:   [243, 242, 238],
-    },
-    noteY:    0.18,   // proportion of pageH for notes block
-    infoY:    0.845,  // proportion of pageH for info block
-    lineH:    5.5,    // mm between info lines
+    ink:        [35, 31, 32],     // #231f20 — guides, arrows, notes
+    slate:      [145, 155, 176], // #919bb0 — spine fill, board outlines, panel titles
+    white:      [255, 255, 255], // spine lettering guides and SPINE title
+    flapTint:   [238, 240, 244], // light slate — flap areas
+    lineW:      0.3,             // mm — solid / dashed guides
+    dotW:       0.35,            // mm — dotted guide dot size
+    dotGap:     0.7,             // mm — dotted guide spacing
+    arrowW:     0.35,            // mm — dimension arrow line
+    headL:      2.2,             // mm — arrowhead length
+    headW:      1.6,             // mm — arrowhead width
+    noteSize:   8,               // pt — notes (Helvetica)
+    specSize:   7,               // pt — job spec lines
+    titleSize:  34,              // pt — BACK / FRONT / SPINE (max; shrinks to fit)
+    titleTrack: 0.12,            // letter spacing, as a fraction of title size
   },
 };

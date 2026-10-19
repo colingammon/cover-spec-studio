@@ -434,49 +434,12 @@ function cvCalcSpine(pages,gsm,vol,baseline,bindAdder=0,roundMm=false) {
   return roundMm ? Math.round(raw) : Math.round(raw*10)/10;
 }
 
-// ── Shared jsPDF helpers ────────────────────────────────────────────
-function cvMakeDoc(pageW,pageH) {
-  const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({ orientation:pageW>=pageH?'landscape':'portrait', unit:'mm', format:[pageW,pageH], compress:true });
-  const SF  = doc.internal.scaleFactor;
-  const ctx = doc.internal.getCurrentPageInfo().pageContext;
-  ctx.trimBox = { bottomLeftX:0, bottomLeftY:0, topRightX:pageW*SF, topRightY:pageH*SF };
-  return doc;
-}
-
-function cvHelpers(doc) {
-  const str  = (r,g,b,lw=0.3)=>{ doc.setDrawColor(r,g,b); doc.setLineWidth(lw); };
-  const fill = (r,g,b)       =>  doc.setFillColor(r,g,b);
-  const ln   = (x1,y1,x2,y2)=>  doc.line(x1,y1,x2,y2);
-  function dash(x1,y1,x2,y2,on=3,off=2) {
-    const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy); if(!len)return;
-    const ux=dx/len,uy=dy/len; let d=0,draw=true;
-    while(d<len){const seg=Math.min(draw?on:off,len-d);if(draw)doc.line(x1+ux*d,y1+uy*d,x1+ux*(d+seg),y1+uy*(d+seg));d+=seg;draw=!draw;}
-  }
-  function txt(x,y,s,size,bold,col,align='center',angle=0) {
-    doc.setTextColor(...col);doc.setFontSize(size);
-    doc.setFont('helvetica',bold?'bold':'normal');
-    doc.text(s,x,y,{align,angle});
-  }
-  function notes(pageW,pageH,l1,l2) {
-    const nY=pageH*CONFIG.pdf.noteY;
-    txt(pageW/2,nY,    l1,11,true,[200,0,0]);
-    txt(pageW/2,nY+5.5,l2,11,true,[200,0,0]);
-  }
-  function infoBlock(pageW,pageH,t1,t2,t3) {
-    const iY=pageH*CONFIG.pdf.infoY;
-    txt(pageW/2,iY,        t1,11,true,[200,0,0]);
-    txt(pageW/2,iY+5.5,    t2,11,true,[200,0,0]);
-    txt(pageW/2,iY+12.5,   t3,11,true,[200,0,0]);
-  }
-  return {str,fill,ln,dash,txt,notes,infoBlock};
-}
-
 // ═══════════════════════════════════════════════════════════════════
 // COVER CALCULATOR — mode state & calculate()
 // ═══════════════════════════════════════════════════════════════════
 
 let cvMode  = 'limp';
+const CV_MODE_LABELS = { limp:'Limp', flaps:'Flaps', jacket:'Jacket', ppc:'PPC' };
 let cvState = null;
 
 const CORE_IDS = ['pHeight','pWidth','gsm','volume','numPages'];
@@ -567,7 +530,6 @@ function cvCalculate() {
   else if (cvMode==='jacket') cvCalcJacket(pH,pW,gsm,vol,pages,hasCore);
   else if (cvMode==='ppc')    cvCalcPPC(pH,pW,gsm,vol,pages,hasCore);
   document.getElementById('btn-download').disabled=!cvState;
-  document.getElementById('btn-svg').disabled=!cvState;
   document.getElementById('btn-specs').disabled=!cvState;
   document.getElementById('btn-save-calc').disabled=!cvState;
 }
@@ -670,7 +632,7 @@ function cvCalcPPC(pH,pW,gsm,vol,pages,hasCore) {
     'Gutter':gutter+'mm each side — avoid type in this area',
     'Wraparound':`${wrap}mm all sides (top, bottom, front & back)`,
   });
-  cvState=hasCore?{mode:'ppc',pH,pW,spine,coverW,gutter,trimW,trimH,docW,docH,WRAP:wrap,boardVal}:null;
+  cvState=hasCore?{mode:'ppc',pH,pW,spine,coverW,gutter,trimW,trimH,docW,docH,WRAP:wrap,boardVal,ppcType}:null;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -679,186 +641,16 @@ function cvCalcPPC(pH,pW,gsm,vol,pages,hasCore) {
 
 function cvGeneratePDF() {
   if(!cvState) return;
-  if      (cvState.mode==='limp')   pdfLimp();
-  else if (cvState.mode==='flaps')  pdfFlaps();
-  else if (cvState.mode==='jacket') pdfJacket();
-  else if (cvState.mode==='ppc')    pdfPPC();
-}
-
-// ── LIMP ──────────────────────────────────────────────────────────
-function pdfLimp() {
-  const {pW,pH,spine,docW,docH}=cvState;
-  const HINGE=3,pageW=docW,pageH=docH;
-  const doc=cvMakeDoc(pageW,pageH);
-  const {str,fill,ln,dash,txt,notes,infoBlock}=cvHelpers(doc);
-  const bx=pW,sx=pW+spine,spineCx=pW+spine/2;
-  const midY=pageH/2,midBx=pW/2,midFx=sx+pW/2;
-
-  fill(232,231,227);doc.rect(0,0,pW,pageH,'F');
-  fill(212,210,204);doc.rect(bx,0,spine,pageH,'F');
-  fill(238,237,233);doc.rect(sx,0,pW,pageH,'F');
-  str(0,0,0,0.4);doc.rect(0,0,pageW,pageH,'S');
-  str(0,0,0,0.5);ln(bx,0,bx,pageH);ln(sx,0,sx,pageH);
-  str(80,80,80,0.3);dash(spineCx,0,spineCx,pageH,3,2);
-  str(80,80,80,0.3);dash(bx-HINGE,0,bx-HINGE,pageH,2,1.5);dash(sx+HINGE,0,sx+HINGE,pageH,2,1.5);
-
-  txt(midBx,midY-5,'BACK COVER',14,true,[220,0,0]);
-  txt(midBx,midY+5,`${cvFmtInt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
-  txt(midFx,midY-5,'FRONT COVER',14,true,[220,0,0]);
-  txt(midFx,midY+5,`${cvFmtInt(docH)} × ${cvFmt(pW)} mm`,10,false,[110,110,110]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',11,true,[200,0,0]);txt(spineCx,midY+5,`${cvFmt(spine)} mm`,9,false,[240,80,80]);}
-  else if(spine>=4){txt(spineCx,midY,`${cvFmt(spine)}mm`,8,true,[40,40,40],'center',90);}
-
-  notes(pageW,pageH,'A 3mm hinge will be created as part of the manufacturing process','Avoid type matter running into this area');
-  infoBlock(pageW,pageH,
-    'Cover Layout — Limp Cover Template',
-    `Document Size: ${cvFmt(docH)} × ${cvFmt(docW)} mm  |  Spine: ${cvFmt(spine)} mm  |  Page: ${cvFmt(docH)} × ${cvFmt(pW)} mm`,
-    'Add 3mm bleed allowance to the document');
-  doc.save(`limp-template-${cvFmt(pW,0)}x${cvFmt(docH,0)}-sp${cvFmt(spine)}.pdf`);
-}
-
-// ── FLAPS ─────────────────────────────────────────────────────────
-function pdfFlaps() {
-  const {pW,pH,spine,coverW,flapW,docW,docH}=cvState;
-  const HINGE=3,pageW=docW,pageH=docH;
-  const doc=cvMakeDoc(pageW,pageH);
-  const {str,fill,ln,dash,txt,notes,infoBlock}=cvHelpers(doc);
-
-  const x1=flapW, x2=x1+coverW, x3=x2+spine, x4=x3+coverW;
-  const spineCx=x2+spine/2, midY=pageH/2;
-
-  fill(225,224,220);doc.rect(0,0,flapW,pageH,'F');
-  fill(232,231,227);doc.rect(x1,0,coverW,pageH,'F');
-  fill(212,210,204);doc.rect(x2,0,spine,pageH,'F');
-  fill(238,237,233);doc.rect(x3,0,coverW,pageH,'F');
-  fill(225,224,220);doc.rect(x4,0,flapW,pageH,'F');
-
-  str(0,0,0,0.4);doc.rect(0,0,pageW,pageH,'S');
-  // Score/fold lines — dashed (not solid)
-  str(0,0,0,0.5);dash(x1,0,x1,pageH,3,2);dash(x4,0,x4,pageH,3,2);
-  // Spine boundaries — solid
-  str(0,0,0,0.4);ln(x2,0,x2,pageH);ln(x3,0,x3,pageH);
-  // Spine centre
-  str(80,80,80,0.3);dash(spineCx,0,spineCx,pageH,3,2);
-  // Hinge lines
-  str(80,80,80,0.3);dash(x2-HINGE,0,x2-HINGE,pageH,2,1.5);dash(x3+HINGE,0,x3+HINGE,pageH,2,1.5);
-
-  // Panel labels — no FOLD annotations
-  txt(flapW/2,     midY,'BACK FLAP',  11,true,[80,80,80]);
-  txt(x1+coverW/2, midY-5,'BACK COVER',14,true,[220,0,0]);
-  txt(x1+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x3+coverW/2, midY-5,'FRONT COVER',14,true,[220,0,0]);
-  txt(x3+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x4+flapW/2,  midY,'FRONT FLAP', 11,true,[80,80,80]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmt(spine)} mm`,8,false,[240,80,80]);}
-  else if(spine>=4){txt(spineCx,midY,`${cvFmt(spine)}mm`,7,true,[40,40,40],'center',90);}
-
-  notes(pageW,pageH,'A 3mm hinge will be created as part of the manufacturing process','Avoid type matter running into this area — ensure artwork extends to fold');
-  infoBlock(pageW,pageH,
-    'Cover Layout — Limp with Flaps (8pp) Template',
-    `Doc: ${cvFmt(docH)} × ${cvFmt(docW)} mm  |  Spine: ${cvFmt(spine)} mm  |  Flap: ${cvFmt(flapW)} mm`,
-    'Add 3mm bleed allowance to the document');
-  doc.save(`flaps-template-${cvFmt(pW,0)}x${cvFmt(docH,0)}-sp${cvFmt(spine)}.pdf`);
-}
-
-// ── JACKET ────────────────────────────────────────────────────────
-function pdfJacket() {
-  const {pW,pH,spine,coverW,flapW,TURN,docW,docH}=cvState;
-  const pageW=docW,pageH=docH;
-  const doc=cvMakeDoc(pageW,pageH);
-  const {str,fill,ln,dash,txt,infoBlock}=cvHelpers(doc);
-
-  const x1=flapW, x2=x1+TURN, x3=x2+coverW, x4=x3+spine, x5=x4+coverW, x6=x5+TURN;
-  const spineCx=x3+spine/2, midY=pageH/2;
-
-  fill(222,220,214);doc.rect(0,0,flapW,pageH,'F');
-  fill(230,228,222);doc.rect(x1,0,TURN,pageH,'F');
-  fill(232,231,227);doc.rect(x2,0,coverW,pageH,'F');
-  fill(212,210,204);doc.rect(x3,0,spine,pageH,'F');
-  fill(238,237,233);doc.rect(x4,0,coverW,pageH,'F');
-  fill(230,228,222);doc.rect(x5,0,TURN,pageH,'F');
-  fill(222,220,214);doc.rect(x6,0,flapW,pageH,'F');
-
-  str(0,0,0,0.4);doc.rect(0,0,pageW,pageH,'S');
-  // Fold lines — dashed (not solid), no FOLD annotations
-  str(0,0,0,0.5);dash(x1,0,x1,pageH,3,2);dash(x6,0,x6,pageH,3,2);
-  // Turn-in lines — dashed
-  str(60,60,60,0.35);dash(x2,0,x2,pageH,3,2);dash(x5,0,x5,pageH,3,2);
-  // Spine boundaries — solid
-  str(0,0,0,0.4);ln(x3,0,x3,pageH);ln(x4,0,x4,pageH);
-  // Spine centre
-  str(80,80,80,0.3);dash(spineCx,0,spineCx,pageH,3,2);
-
-  // Panel labels — no TURN-IN vertical annotations
-  txt(flapW/2,     midY,'BACK FLAP',  11,true,[80,80,80]);
-  txt(x2+coverW/2, midY-5,'BACK COVER',14,true,[220,0,0]);
-  txt(x2+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x4+coverW/2, midY-5,'FRONT COVER',14,true,[220,0,0]);
-  txt(x4+coverW/2, midY+5,`${cvFmtInt(docH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x6+flapW/2,  midY,'FRONT FLAP', 11,true,[80,80,80]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmtInt(spine)} mm`,8,false,[240,80,80]);}
-  else if(spine>=4){txt(spineCx,midY,`${cvFmtInt(spine)}mm`,7,true,[40,40,40],'center',90);}
-
-  const nY=pageH*CONFIG.pdf.noteY;
-  txt(pageW/2,nY,    'Ensure artwork extends into the 10mm turn-in allowance',11,true,[200,0,0]);
-  txt(pageW/2,nY+5.5,'Extend fore-edge bleeds into the turn-in area',11,true,[200,0,0]);
-  infoBlock(pageW,pageH,
-    'Cover Layout — Dust Jacket Template',
-    `Doc: ${cvFmtInt(docH)} × ${cvFmtInt(docW)} mm  |  Spine: ${cvFmtInt(spine)} mm  |  Flap: ${cvFmt(flapW)} mm  |  Boards: ${cvState.boardVal}mm`,
-    'Add 3mm bleed allowance to the document');
-  doc.save(`jacket-template-${cvFmt(pW,0)}x${cvFmt(pH,0)}-sp${cvFmtInt(spine)}.pdf`);
-}
-
-// ── PPC ───────────────────────────────────────────────────────────
-function pdfPPC() {
-  const {pW,pH,spine,coverW,gutter,trimW,trimH,docW,docH,WRAP}=cvState;
-  const pageW=docW,pageH=docH;
-  const doc=cvMakeDoc(pageW,pageH);
-  const {str,fill,ln,dash,txt,infoBlock}=cvHelpers(doc);
-
-  const x1=WRAP, x2=x1+coverW, x3=x2+gutter, x4=x3+spine, x5=x4+gutter, x6=x5+coverW;
-  const trimTop=WRAP, trimBot=pageH-WRAP;
-  const spineCx=x3+spine/2, midY=pageH/2;
-
-  fill(232,231,227);doc.rect(0,0,pageW,pageH,'F');
-  fill(238,237,234);doc.rect(x1,trimTop,coverW,trimH,'F');
-  fill(212,210,204);doc.rect(x3,trimTop,spine,trimH,'F');
-  fill(243,242,238);doc.rect(x5,trimTop,coverW,trimH,'F');
-
-  str(0,0,0,0.4);doc.rect(0,0,pageW,pageH,'S');
-  str(0,0,0,0.35);doc.rect(x1,trimTop,trimW,trimH,'S');
-  str(0,0,0,0.3);ln(0,trimTop,pageW,trimTop);ln(0,trimBot,pageW,trimBot);
-  // Spine boundaries — solid
-  str(0,0,0,0.5);ln(x2,0,x2,pageH);ln(x5,0,x5,pageH);
-  // Gutter lines — dashed
-  str(80,80,80,0.3);dash(x3,0,x3,pageH,2,1.5);dash(x4,0,x4,pageH,2,1.5);
-  // Spine centre
-  str(80,80,80,0.25);dash(spineCx,0,spineCx,pageH,3,2);
-
-  // Wraparound labels (horizontal only — no vertical annotations)
-  txt(x1+trimW/2, trimTop/2+3,   `${WRAP}mm wraparound (all sides)`,9,true,[80,80,80]);
-  txt(x1+trimW/2, trimBot+7,     `${WRAP}mm wraparound (all sides)`,9,true,[80,80,80]);
-
-  // Panel labels — no vertical FOLD annotations, no vertical side labels
-  txt(x1+coverW/2, midY-5,'BACK COVER',  14,true,[220,0,0]);
-  txt(x1+coverW/2, midY+5,`${cvFmtInt(trimH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  txt(x5+coverW/2, midY-5,'FRONT COVER', 14,true,[220,0,0]);
-  txt(x5+coverW/2, midY+5,`${cvFmtInt(trimH)} × ${cvFmt(coverW)} mm`,10,false,[110,110,110]);
-  if(spine>=10){txt(spineCx,midY-4,'SPINE',10,true,[200,0,0]);txt(spineCx,midY+4,`${cvFmtInt(spine)} mm`,8,false,[240,80,80]);}
-  else if(spine>=4){txt(spineCx,midY,`${cvFmtInt(spine)}mm`,7,true,[40,40,40],'center',90);}
-
-  // Gutter dimension labels
-  txt(x2+gutter/2, trimTop+8,`${gutter}mm`,8,true,[80,80,80]);
-  txt(x4+gutter/2, trimTop+8,`${gutter}mm`,8,true,[80,80,80]);
-
-  const nY=pageH*CONFIG.pdf.noteY;
-  txt(pageW/2,nY,    'Avoid type matter going into the gutter allowance',11,true,[200,0,0]);
-  txt(pageW/2,nY+5.5,'Ensure artwork extends into the 15mm wraparound',11,true,[200,0,0]);
-  infoBlock(pageW,pageH,
-    'Cover Layout — PPC Template',
-    `Doc: ${cvFmtInt(docH)} × ${cvFmtInt(docW)} mm  |  Trim: ${cvFmtInt(trimH)} × ${cvFmtInt(trimW)} mm  |  Spine: ${cvFmtInt(spine)} mm  |  Gutter: ${gutter}mm  |  Boards: ${cvState.boardVal}mm`,
-    'No additional bleed required — wraparound acts as bleed');
-  doc.save(`ppc-template-${cvFmt(pW,0)}x${cvFmt(pH,0)}-sp${cvFmtInt(spine)}.pdf`);
+  // Layouts live in pdfTemplates.js
+  const build={ limp:pdfBuildLimp, flaps:pdfBuildFlaps, jacket:pdfBuildJacket, ppc:pdfBuildPPC }[cvState.mode];
+  if(!build) return;
+  const {pW,pH,spine,docH}=cvState;
+  const cased=cvState.mode==='jacket'||cvState.mode==='ppc';
+  // Paperbacks: width × document height, spine to 1dp; cased: width × trim height, spine to whole mm
+  const name=cased
+    ? `${cvState.mode}-template-${cvFmt(pW,0)}x${cvFmt(pH,0)}-sp${cvFmtInt(spine)}.pdf`
+    : `${cvState.mode}-template-${cvFmt(pW,0)}x${cvFmt(docH,0)}-sp${cvFmt(spine)}.pdf`;
+  build(cvState).save(name);
 }
 
 // ── DOWNLOAD SPECS TEXT FILE ──────────────────────────────────────
@@ -879,7 +671,7 @@ function cvDownloadSpecs() {
 
   specs += `COVER TYPE\n`;
   specs += `${'-'.repeat(60)}\n`;
-  specs += `TYPE: ${cvMode.charAt(0).toUpperCase() + cvMode.slice(1)}\n\n`;
+  specs += `TYPE: ${CV_MODE_LABELS[cvMode]}\n\n`;
 
   specs += `PAGE DIMENSIONS\n`;
   specs += `${'-'.repeat(60)}\n`;
@@ -1008,7 +800,7 @@ function cvSaveCalculation() {
   const input = document.getElementById('saveCalcName');
 
   // Pre-fill with default name
-  const defaultName = `${cvMode.charAt(0).toUpperCase() + cvMode.slice(1)} • ${document.getElementById('pHeight').value}×${document.getElementById('pWidth').value}`;
+  const defaultName = `${CV_MODE_LABELS[cvMode]} • ${document.getElementById('pHeight').value}×${document.getElementById('pWidth').value}`;
   input.value = defaultName;
   input.focus();
   input.select();

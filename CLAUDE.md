@@ -15,13 +15,14 @@ Originally reverse-engineered from a suite of Acrobat PDF calculator forms. All 
 
 ## File structure
 
-Three files — no build step, no framework, deployable from any static server or filesystem:
+Four files — no build step, no framework, deployable from any static server or filesystem:
 
 | File | Purpose |
 |---|---|
 | `index.html` | Markup, CSS, tab navigation, all HTML for every tool tab |
-| `script.js` | All application logic — calculations, PDF generation, barcode encoding, micron converter |
-| `config.js` | Central configuration — brand, cover type rules, spine formulas, board options, alert messages, PDF draw constants |
+| `script.js` | All application logic — calculations, PDF dispatch, barcode encoding, micron converter |
+| `pdfTemplates.js` | PDF template layouts — one builder per cover type, plus the drawing kit (guides, dimension arrows, notes, titles) |
+| `config.js` | Central configuration — brand, cover type rules, spine formulas, board options, alert messages, PDF drawing constants |
 
 Root assets expected alongside these files:
 
@@ -145,15 +146,15 @@ All cover-type rules, board options, alert messages, and PDF draw constants live
 CONFIG = {
   brand: { name, tagline },
   coverTypes: {
-    limp:   { spineBaseline, spineRoundMm, maxSpineMm, hinge, bleedNote, ... },
-    flaps:  { spineBaseline, maxSpineMm, maxDocWMm, flapMin, hinge, ... },
-    jacket: { spineBaseline, spineRoundMm, maxSpineMm, boardOverhang, turnIn, flapMin, flapMax, heightAdd, ... },
-    ppc:    { spineBaseline, spineRoundMm, maxSpineMm, wrap, heightAdd, subtypes: { round, presspahn, flatback } },
+    limp:   { spineBaseline, spineRoundMm, maxSpineMm, hinge, safeZone, bleedNote, pdfNote, templateTitle, ... },
+    flaps:  { spineBaseline, maxSpineMm, flapMin, hinge, safeZone, bleedNote, pdfNote, templateTitle, ... },
+    jacket: { spineBaseline, spineRoundMm, maxSpineMm, boardOverhang, turnIn, flapMin, flapMax, heightAdd, safeZone, ... },
+    ppc:    { spineBaseline, spineRoundMm, maxSpineMm, wrap, heightAdd, safeEdge, safeSpine, subtypes: { round, presspahn, flatback } },
   },
   boardThicknesses: [ { label, value }, ... ],  // populated into <select> at runtime
   bindingAdders: { '0': 0, '2': 2 },            // Perfect Bound / Sewn
   alerts: { spine60, spine50, flapMin, flapMax, jktFlapMin, jktFlapMax, boardReq },
-  pdf: { fills, noteY, infoY, lineH },
+  pdf: { ink, slate, white, flapTint, lineW, dotW, dotGap, arrowW, headL, headW, noteSize, specSize, titleSize, titleTrack },
 }
 ```
 
@@ -283,6 +284,14 @@ Do not swap to W × H.
 
 ## PDF template specification
 
+### Architecture
+
+- `pdfTemplates.js` holds one builder per cover type: `pdfBuildLimp`, `pdfBuildFlaps`, `pdfBuildJacket`, `pdfBuildPPC`. Each takes `cvState` and returns a jsPDF document.
+- `cvGeneratePDF()` in `script.js` picks the builder from `cvState.mode`, builds the document and saves it. It does no drawing itself.
+- `pdfNewDoc(pageW, pageH)` creates the page at document size and sets the TrimBox.
+- `pdfKit(doc)` is the drawing kit: `line`, `dotted`, `dashed`, `rect`, `box`, `arrow`, `note`, `vnote`, `title`, `safeRect`, `spec`.
+- Geometry comes from `cvState` (calculated in `script.js`). Drawing constants come from `CONFIG.pdf`. Cover rules (safe zones, hinge, overhang, wrap) come from `CONFIG.coverTypes`. Change them in `config.js`, not in `pdfTemplates.js`.
+
 ### Page geometry
 
 | Property | Value |
@@ -314,45 +323,39 @@ topRightY   = (pageH − bleed) × SF
 
 ### PDF draw order — all cover types
 
-1. Section fills (back / spine / front / flap / turn-in as applicable)
-2. Page border — solid black, lw 0.4
-3. Spine boundary lines — solid black, lw 0.5, full page height
-4. Spine centre line — dashed grey (3/2mm), lw 0.3
-5. Cover-type-specific guides:
-   - **Limp / Flaps** — hinge lines (dashed, 3mm inboard of spine), score/fold lines on flaps (dashed)
-   - **Jacket** — fold lines at flap boundary (dashed), turn-in lines (dashed)
-   - **PPC** — gutter lines (dashed), horizontal wraparound fold lines
-6. Section labels — BACK COVER / FRONT COVER / SPINE centred in panels, mid-page vertically
-7. Notes block — two bold 11pt lines centred at `pageH × 0.18`
-8. Info block — three bold 11pt lines centred at `pageH × 0.845`
+1. Section fills — flap tint on flaps and jacket flaps, slate spine, slate case boards (PPC)
+2. Page border — slate, lw 0.25
+3. Guides — solid/dashed hinge, fold, score, turn-in and gutter lines; dotted fold and turn-in lines on jackets
+4. Safe zones — dotted rectangles inset from trim, with the label sitting in a gap in the top or bottom edge
+5. Titles — BACK / FRONT / FLAP / SPINE, letter-spaced, shrunk to fit their panel. SPINE is white on slate.
+6. Dimension arrows, each with a short note
+7. Job spec block — title, document / spine / page sizes, bleed note. Bottom-left of the back panel; in the bottom turn-in for PPC.
 
-**No fold/TURN-IN vertical text annotations** — removed at client request (confusing to less experienced users).
+**Vertical notes are used** for hinge, score and turn-in labels. Rotated text can crowd the dotted lines, so check it in the rendered PDF.
 
-**No bleed guide** — removed at client request. Bleed is communicated as a text note only.
+**No bleed guide** — bleed is communicated as a text note only.
 
-### PDF section fill colours (RGB)
+### Layout by cover type
 
-| Section | R | G | B |
-|---|---|---|---|
-| Back cover | 232 | 231 | 227 |
-| Spine | 212 | 210 | 204 |
-| Front cover | 238 | 237 | 233 |
-| Flap | 225 | 224 | 220 |
-| Turn-in | 230 | 228 | 222 |
-| PPC base (full page) | 232 | 231 | 227 |
-| PPC back board | 238 | 237 | 234 |
-| PPC front board | 243 | 242 | 238 |
+- **Limp** — slate spine. Dashed hinge lines 3mm either side of the spine. Dotted safe zones 3mm from trim. Trim width arrow across the back and trim height arrow down the front.
+- **Flaps** — flap tint on both flaps, dashed score lines at the flap folds, hinge lines beside the spine. Flap width arrows on the top edge. Cover panel width arrow notes the +1mm tolerance.
+- **Jacket** — flaps include a 10mm turn-in. Dotted guides at flap fold, board overhang, trimmed width and turn-in limits. Flap width arrows across the top, 10mm turn-in strips, and a jacket height note. Front arrows show trimmed width, centring width (trim + overhang) and folding extent (trim + overhang + turn-in).
+- **PPC** — case boards with dotted 4mm safe zones (`safeEdge`). Dotted 2mm spine lettering limits (`safeSpine`). 15mm wraparound arrows on all four edges (`WRAP`). Gutter arrows for the joint (`gutter`), with a joint note naming the back style. Board width note shows the trim width less the gutter. Board height note shows trim height plus 6mm. Centring note on the front unless the back is flatback.
 
-### PDF text sizes
+### PDF drawing constants (`CONFIG.pdf`)
 
-| Element | Size | Weight |
+| Key | Value | Use |
 |---|---|---|
-| BACK COVER / FRONT COVER | 14pt | Bold |
-| Section dimension sub-label | 10pt | Normal |
-| SPINE label | 11pt | Bold |
-| Spine mm value | 9pt | Normal |
-| Notes block / info block | 11pt | Bold |
-| Gutter / wraparound labels (PPC) | 9pt | Bold |
+| `ink` | `[35, 31, 32]` (#231f20) | Guides, arrows, notes |
+| `slate` | `[145, 155, 176]` (#919bb0) | Spine fill, boards, panel titles |
+| `white` | `[255, 255, 255]` | Spine lettering and SPINE title |
+| `flapTint` | `[238, 240, 244]` | Flap areas |
+| `lineW` / `dotW` / `dotGap` | 0.3 / 0.35 / 0.7 mm | Solid and dashed guides; dot size and spacing |
+| `arrowW` / `headL` / `headW` | 0.35 / 2.2 / 1.6 mm | Dimension arrows |
+| `noteSize` / `specSize` | 8pt / 7pt | Notes; job spec lines after the title |
+| `titleSize` / `titleTrack` | 34pt / 0.12 | Panel titles (maximum size) and letter spacing |
+
+Font is Helvetica throughout. Titles are bold; notes and spec lines are normal weight.
 
 ### Filename conventions
 
@@ -363,7 +366,9 @@ topRightY   = (pageH − bleed) × SF
 | Jacket | `jacket-template-{pW}x{pH}-sp{spine}.pdf` | `jacket-template-156x234-sp22.pdf` |
 | PPC | `ppc-template-{pW}x{pH}-sp{spine}.pdf` | `ppc-template-156x234-sp20.pdf` |
 
-Widths/heights use `fmt(n, 0)` (integer). Spine uses `fmt(n)` (1dp) for limp/flaps, `fmtInt(n)` (whole mm) for jacket/PPC.
+Widths/heights use `cvFmt(n, 0)` (integer). Spine uses `cvFmt(n)` (1dp) for limp/flaps, `cvFmtInt(n)` (whole mm) for jacket/PPC.
+
+---
 
 ---
 
@@ -533,53 +538,6 @@ IDs: `btn-specs`, triggered from results card.
 
 ---
 
-## SVG Template Export
-
-Generates cover templates as native SVG files for editing in Adobe Illustrator, Affinity Designer, Affinity Publisher, InDesign, and other design applications. SVG templates are fully editable—edit guides, text, dimensions, and color fills directly in your design tool.
-
-**Format:**
-- Native vector (scalable, resolution-independent)
-- System fonts (Arial/Helvetica) for universal compatibility
-- Organized into named groups (`fills`, `guides`, `back-section`, `front-section`, `spine-section`, `notes`, `info`)
-- Viewbox in mm matching page dimensions (measured at 96 DPI)
-
-**Contents replicate PDF layout exactly:**
-- Colored section fills (back/spine/front/flaps/turn-ins/wraparound)
-- Structural guides (spine boundaries, fold lines, hinge lines, gutter lines, trim boundaries)
-- Dimension text labels (9-7px sizes for readability)
-- Production notes and spec blocks
-- Cover-type-specific annotations (flap widths, turn-in distances, board sizes, wraparound measurements)
-
-**Supported cover types:**
-- ✓ Limp / Paperback
-- ✓ Limp with Flaps (8pp)
-- ✓ Dust Jacket
-- ✓ Printed Paper Case (PPC)
-
-**Workflow:**
-1. Calculate cover specs in CoverSpec Studio
-2. Click "Download SVG Template"
-3. Open `.svg` file in Illustrator, Affinity Designer, or InDesign
-4. Create artwork on layers above the template
-5. Use guides as safe-zone and fold-line references
-6. Export finished cover artwork from design tool
-
-**Text styling:**
-- Main labels (BACK COVER, FRONT COVER, SPINE): 9px, bold, dark red (#dc0000)
-- Dimension values: 7px, gray (#6e6e6e)
-- Spine values: 8px, dark red (#c80000)
-- Production notes/info: 7px, dark red (#c80000)
-
-**File naming:** `{mode}-template-{pW}x{docH}-sp{spine}.svg`
-- Limp: `limp-template-156x234-sp17.1.svg`
-- Flaps: `flaps-template-156x234-sp17.1.svg`
-- Jacket: `jacket-template-156x234-sp22.svg`
-- PPC: `ppc-template-156x234-sp20.svg`
-
-IDs: `btn-svg` (button), `cvDownloadSVG()` (function)
-
----
-
 ## Paper Stock Presets
 
 Optional dropdown feature (enabled via `CONFIG.features.enablePaperPresets`) pre-populates gsm and volume from common international paper stocks:
@@ -641,8 +599,8 @@ function cvFmtInt(n) { return String(Math.round(n)); }
 ## Known constraints and decisions
 
 - **No bleed on the PDF page.** Page = trim size only. Bleed instruction is a text note. Adding a bleed-padded page with dashed guides was tried and rejected as confusing to non-technical users.
-- **No dimension annotation lines.** Arrow/tick-mark dimensions were removed. Plain bold text labels only.
-- **No fold/TURN-IN/FOLD vertical text annotations.** Tried and removed — rotated text rendering was inconsistent across viewers.
+- **Dimension arrows with short notes.** Arrows mark each dimension, with a plain-English note beside it. Keep notes short.
+- **Vertical notes are allowed** for hinge, score and turn-in labels. Check them in the rendered PDF, since rotated text rendering varies between viewers.
 - **No white background boxes behind text.** Tried and removed — text sits directly on section fills.
 - **Spine rounded before docW.** `Math.round(raw × 10) / 10` applied immediately to prevent displayed spine and docW disagreeing due to float precision.
 - **Board thickness required for jacket and PPC.** Alert fires if user enters dimensions without selecting a board size. Without a board value the spine is materially wrong.
@@ -651,6 +609,9 @@ function cvFmtInt(n) { return String(Math.round(n)); }
 ---
 
 ## Recent updates (v2.0+)
+
+- **PDF templates rebuilt:** Layouts moved to `pdfTemplates.js`. They use slate spines, dotted safe zones, dimension arrows with short notes, and job spec lines. Drawing constants moved to `CONFIG.pdf`. The old red-text PDF style is retired.
+- **SVG template export removed:** `svgGenerator.js` and the SVG download button were removed.
 
 - **Rebranding:** Project renamed to "CoverSpec Studio" with tagline "Production-Ready Cover Specs"
 - **Enhanced config.js:** Added comprehensive customization guide and inline comments explaining all dimension constraints, alert triggers, and how to modify production rules
@@ -668,11 +629,9 @@ function cvFmtInt(n) { return String(Math.round(n)); }
 - **Clean branding:** Removed all references to previous white-label client (TJ Clays/TJ Books)
 - **MIT License:** Published as open-source with permissive licensing
 - **Barcode Text Customization:** ISBN barcode generator now supports toggling ISBN label, digit numbers, and EAN-5 add-on display. Font scaling (50–150%), ISBN format options (formatted vs. raw), and real-time text overflow warning when text exceeds barcode width. Improved text alignment and positioning for cleaner layout
-- **SVG Template Export:** Cover templates now export as fully-editable native SVG files for Illustrator, Affinity Designer, and InDesign. All four cover types (Limp, Flaps, Jacket, PPC) supported with organized layer structure, matching PDF layout exactly, system fonts for universal compatibility, and cover-type-specific annotations
 - **Standard Sizes Reference:** New reference tab displaying UK and European standard book trim sizes (A-Format through A4) with binding types and use cases. Sourced from comprehensive book sizes research document
 - **Spine Warning Updates:** Spine alert messages now reference binding machine limits (Min 2mm – Max 65mm recommended) and suggest contacting printer or considering lower grammage paper as alternatives
 - **Flaps Width Constraint Removed:** Removed 580mm maximum document width constraint for 8pp flap covers, allowing greater flexibility for varied production scenarios
-- **SVG Notes Position:** Notes text at top of SVG templates moved down 10mm for improved spacing and readability
 
 ---
 
@@ -720,46 +679,11 @@ Saved calculations appear in a dropdown at the bottom of the form. Users can loa
 
 ---
 
-## SVG Workflow & Best Practices
+## PDF Generation
 
-**When to use SVG vs. PDF:**
-- **SVG:** Preferred for interactive editing in Illustrator, Affinity Designer, InDesign. Layers and groups are native SVG elements you can show/hide, lock/unlock, modify. Best for complex layouts or iterative design.
-- **PDF:** Use as a reference guide layer when you want an immutable overlay. Lighter-weight for simple layouts.
-
-**SVG layer structure:**
-All SVG templates organize content into logical groups:
-- `fills` — Colored section backgrounds
-- `guides` — Spine/fold/hinge/gutter lines (lock this layer when working on artwork)
-- `[section]-section` — Labels and dimensions for back/front/spine (safe to delete)
-- `notes`, `info` — Production text (delete or keep as reference)
-
-**Best practice workflow:**
-1. Download SVG template from CoverSpec Studio
-2. Open in your design application (Illustrator, Affinity, InDesign)
-3. Lock the `guides` layer (prevents accidental moving)
-4. Create a new layer above guides for artwork
-5. Use guide lines as visual references for safe zones, fold positions, bleed areas
-6. Import artwork into your new layer
-7. Delete or hide the text/notes groups if not needed
-8. Export final artwork from design tool
-
-**Editing in-place:**
-You can edit template elements directly if needed:
-- Modify text labels to match your branding
-- Adjust fill colors to match proof stage (e.g., pink for live files, gray for proofs)
-- Reposition dimension notes to avoid artwork
-- Add your own guides or annotations
-
----
-
-## PDF Generation (Red Text)
-
-All text in generated PDFs renders in red for visibility:
-- Section labels (BACK COVER, FRONT COVER, SPINE): `[220,0,0]` (bright red)
-- Spine text & notes: `[200,0,0]` (darker red)
-- Dimension values: `[240,80,80]` (lighter red)
-
-Change colors in the `txt()` calls throughout the PDF generation functions (lines 600+).
+- Dispatch: `cvGeneratePDF()` in `script.js` → `pdfBuild*()` in `pdfTemplates.js` → `doc.save()`.
+- All guide and note text uses `CONFIG.pdf.ink` (#231f20). Section titles use `CONFIG.pdf.slate`, or white on the spine.
+- To change a colour, weight or size, edit `CONFIG.pdf`. To change a label or note, edit the matching line in `pdfTemplates.js`. Notes read the numbers from `cvState` so they always match the calculated figures.
 
 ---
 
